@@ -11,7 +11,7 @@ os.environ["CUDA_VISIBLE_DEVICES"]="0"
 ##### set parameters
 episodes = 2
 gamma = 0.99 # specified by homework
-learning_rate = 0.002
+learning_rate = 0.01
 hidden_size = 20 
 epochs = 10000
 
