@@ -9,11 +9,11 @@ import os
 # os.environ["CUDA_VISIBLE_DEVICES"]="2"
 
 ##### set parameters
-episodes = 4
+episodes = 2
 gamma = 0.99 # specified by homework
 learning_rate = 0.002
 hidden_size = 20 
-epochs = 2
+epochs = 10000
 
 # image processing
 def preprocess(image):
