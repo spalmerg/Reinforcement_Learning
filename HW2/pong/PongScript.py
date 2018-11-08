@@ -6,7 +6,7 @@ import tensorflow as tf
 import os
 
 #### set up GPU
-os.environ["CUDA_VISIBLE_DEVICES"]="2"
+# os.environ["CUDA_VISIBLE_DEVICES"]="2"
 
 ##### set parameters
 episodes = 4
