@@ -9,7 +9,7 @@ import os
 os.environ["CUDA_VISIBLE_DEVICES"]="0"
 
 ##### set parameters
-episodes = 3
+episodes = 2
 gamma = 0.99 # specified by homework
 learning_rate = 0.001
 hidden_size = 200
