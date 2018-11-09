@@ -56,7 +56,7 @@ class PolicyGradient():
                 self.out1 = tf.nn.relu(self.bn1, 'relu')
 
             with tf.variable_scope("second_layer"):
-                self.fc2 = tf.contrib.layers.fully_connected(self.out1, action_size, weights_initializer=tf.contrib.layers.xavier_initializer())
+                self.fc2 = tf.contrib.layers.fully_connected(self.out1, hidden_size, weights_initializer=tf.contrib.layers.xavier_initializer())
                 self.bn2 = tf.contrib.layers.batch_norm(self.fc2, center=True, scale=True)
                 self.out2 =  tf.nn.relu(self.bn2, 'relu')
 
@@ -92,6 +92,7 @@ class Baseline():
                 self.fc2 = tf.contrib.layers.fully_connected(self.out1, action_size, weights_initializer=tf.contrib.layers.xavier_initializer())
                 self.bn2 = tf.contrib.layers.batch_norm(self.fc2, center=True, scale=True)
                 self.out2 =  tf.nn.relu(self.bn2, 'relu')
+            
             self.fc3 = tf.contrib.layers.fully_connected(self.out2, 1, activation_fn=None, 
                                                                  weights_initializer=tf.contrib.layers.xavier_initializer())
 
