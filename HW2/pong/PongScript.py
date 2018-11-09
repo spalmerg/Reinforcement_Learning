@@ -83,11 +83,16 @@ class Baseline():
             self.expected_future_rewards_ = tf.placeholder(tf.float32, [None,], name="expected_future_rewards")
 
             # Hidden Layers
-            self.fc1 = tf.contrib.layers.fully_connected(self.inputs_, hidden_size, 
-                                                         weights_initializer=tf.contrib.layers.xavier_initializer())
-            self.fc2 = tf.contrib.layers.fully_connected(self.fc1, hidden_size, 
-                                                         weights_initializer=tf.contrib.layers.xavier_initializer())
-            self.fc3 = tf.contrib.layers.fully_connected(self.fc2, 1, activation_fn=None, 
+            with tf.variable_scope("first_layer"):
+                self.fc1 = tf.contrib.layers.fully_connected(self.inputs_, hidden_size, weights_initializer=tf.contrib.layers.xavier_initializer())
+                self.bn1 = tf.contrib.layers.batch_norm(self.fc1, center=True, scale=True)
+                self.out1 = tf.nn.relu(self.bn1, 'relu')
+
+            with tf.variable_scope("second_layer"):
+                self.fc2 = tf.contrib.layers.fully_connected(self.out1, action_size, weights_initializer=tf.contrib.layers.xavier_initializer())
+                self.bn2 = tf.contrib.layers.batch_norm(self.fc2, center=True, scale=True)
+                self.out2 =  tf.nn.relu(self.bn2, 'relu')
+            self.fc3 = tf.contrib.layers.fully_connected(self.out2, 1, activation_fn=None, 
                                                                  weights_initializer=tf.contrib.layers.xavier_initializer())
 
             # Define Loss
