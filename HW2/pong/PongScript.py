@@ -11,8 +11,8 @@ os.environ["CUDA_VISIBLE_DEVICES"]="0"
 ##### set parameters
 episodes = 5
 gamma = 0.99 # specified by homework
-learning_rate = 0.01
-hidden_size = 100
+learning_rate = 0.001
+hidden_size = 200
 epochs = 10000
 
 # image processing
@@ -27,16 +27,17 @@ def preprocess(image):
 
 
 # discounted rewards
-def expected_rewards(episode_rewards):
+def expected_rewards(episode_rewards, standardize = True):
     discounted_episode_rewards = np.zeros_like(episode_rewards)
     cumulative = 0.0
     for i in reversed(range(len(episode_rewards))):
         cumulative = cumulative * gamma + episode_rewards[i]
         discounted_episode_rewards[i] = cumulative
     
-    mean = np.mean(discounted_episode_rewards)
-    std = np.std(discounted_episode_rewards)
-    discounted_episode_rewards = (discounted_episode_rewards - mean) / (std)
+    if standardize: 
+        mean = np.mean(discounted_episode_rewards)
+        std = np.std(discounted_episode_rewards)
+        discounted_episode_rewards = (discounted_episode_rewards - mean) / (std)
     
     return discounted_episode_rewards.tolist()
 
@@ -50,20 +51,15 @@ class PolicyGradient():
             self.actions_ = tf.placeholder(tf.int32, [None, action_size], name='actions')
             self.expected_future_rewards_ = tf.placeholder(tf.float32, [None,], name="expected_future_rewards")
             
-            with tf.variable_scope("first_layer"):
-                self.fc1 = tf.contrib.layers.fully_connected(self.inputs_, hidden_size, weights_initializer=tf.contrib.layers.xavier_initializer())
-                self.bn1 = tf.contrib.layers.batch_norm(self.fc1, center=True, scale=True)
-                self.out1 = tf.nn.relu(self.bn1, 'relu')
-
-            with tf.variable_scope("second_layer"):
-                self.fc2 = tf.contrib.layers.fully_connected(self.out1, action_size, weights_initializer=tf.contrib.layers.xavier_initializer())
-                self.bn2 = tf.contrib.layers.batch_norm(self.fc2, center=True, scale=True)
-                self.out2 =  tf.nn.relu(self.bn2, 'relu')
-
-            self.fc3 = tf.contrib.layers.fully_connected(self.out2, action_size, activation_fn=None, 
+            # Hidden Layers
+            self.fc1 = tf.contrib.layers.fully_connected(self.inputs_, hidden_size, 
+                                                         weights_initializer=tf.contrib.layers.xavier_initializer())
+            self.fc2 = tf.contrib.layers.fully_connected(self.fc1, hidden_size, 
+                                                         weights_initializer=tf.contrib.layers.xavier_initializer())
+            self.fc3 = tf.contrib.layers.fully_connected(self.fc2, action_size, activation_fn=None, 
                                                          weights_initializer=tf.contrib.layers.xavier_initializer())
             
-            # Output Layers
+            # Output Layer
             self.action_distribution = tf.nn.softmax(self.fc3)
             
             # Training Section
@@ -83,17 +79,11 @@ class Baseline():
             self.expected_future_rewards_ = tf.placeholder(tf.float32, [None,], name="expected_future_rewards")
 
             # Hidden Layers
-            with tf.variable_scope("first_layer"):
-                self.fc1 = tf.contrib.layers.fully_connected(self.inputs_, hidden_size, weights_initializer=tf.contrib.layers.xavier_initializer())
-                self.bn1 = tf.contrib.layers.batch_norm(self.fc1, center=True, scale=True)
-                self.out1 = tf.nn.relu(self.bn1, 'relu')
-
-            with tf.variable_scope("second_layer"):
-                self.fc2 = tf.contrib.layers.fully_connected(self.out1, hidden_size, weights_initializer=tf.contrib.layers.xavier_initializer())
-                self.bn2 = tf.contrib.layers.batch_norm(self.fc2, center=True, scale=True)
-                self.out2 =  tf.nn.relu(self.bn2, 'relu')
-            
-            self.fc3 = tf.contrib.layers.fully_connected(self.out2, 1, activation_fn=None, 
+            self.fc1 = tf.contrib.layers.fully_connected(self.inputs_, hidden_size, 
+                                                         weights_initializer=tf.contrib.layers.xavier_initializer())
+            self.fc2 = tf.contrib.layers.fully_connected(self.fc1, hidden_size, 
+                                                         weights_initializer=tf.contrib.layers.xavier_initializer())
+            self.fc3 = tf.contrib.layers.fully_connected(self.fc2, 1, activation_fn=None, 
                                                                  weights_initializer=tf.contrib.layers.xavier_initializer())
 
             # Define Loss
@@ -160,7 +150,7 @@ if __name__ == "__main__":
                     
                     if done:
                         # Calculate discounted reward per episode
-                        exp_rewards = expected_rewards(episode_rewards)
+                        exp_rewards = expected_rewards(episode_rewards, False)
                         all_discount_rewards += exp_rewards
                         
                         # reward per episode
@@ -185,4 +175,4 @@ if __name__ == "__main__":
             
             # average reward per episodes in epoch
             all_rewards.append(np.mean(running_rewards))
-            print("Epoch: %s    Average Reward: %s" %(epoch, np.mean(running_rewards)))   
+            print("Epoch: %s    Average Reward: %s" %(epoch, np.mean(running_rewards)))
