@@ -12,7 +12,7 @@ os.environ["CUDA_VISIBLE_DEVICES"]="0"
 episodes = 2
 gamma = 0.99 # specified by homework
 learning_rate = 0.01
-hidden_size = 20 
+hidden_size = 200
 epochs = 10000
 
 # image processing
@@ -53,7 +53,7 @@ class PolicyGradient():
             # Hidden Layers
             self.fc1 = tf.contrib.layers.fully_connected(self.inputs_, hidden_size, 
                                                          weights_initializer=tf.contrib.layers.xavier_initializer())
-            self.fc2 = tf.contrib.layers.fully_connected(self.fc1, action_size, 
+            self.fc2 = tf.contrib.layers.fully_connected(self.fc1, hidden_size, 
                                                          weights_initializer=tf.contrib.layers.xavier_initializer())
             self.fc3 = tf.contrib.layers.fully_connected(self.fc2, action_size, activation_fn=None, 
                                                          weights_initializer=tf.contrib.layers.xavier_initializer())
