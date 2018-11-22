@@ -10,6 +10,8 @@ from collections import deque
 import random
 from helper import preprocess, Network, epsilon_greedy, copy_parameters
 
+os.environ["CUDA_VISIBLE_DEVICES"]="1"
+
 parser = argparse.ArgumentParser(description='DQN for Breakout Game')
 
 parser.add_argument('--learning_rate', default=0.01, help='Learning rate for optimizer')
