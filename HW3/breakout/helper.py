@@ -72,7 +72,7 @@ def epsilon_greedy(sess, network, state, epsilon=0.99):
     if pick > epsilon: # If off policy -- random action
         action = np.random.randint(0,4)
     else: # If on policy
-        action = np.argmax(network.predict(sess, state))
+        action = np.argmax(network.predict(sess, [state]))
     return action
 
 

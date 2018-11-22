@@ -40,18 +40,18 @@ def main(args):
 
     # reset and initialize networks (Q & Target)
     tf.reset_default_graph()
-    QNetwork = Network(name='QNetwork', hidden_size=int(args.hidden_size),
-                                        learning_rate=float(args.learning_rate), 
-                                        action_size=int(args.action_size))
-    target = Network(name='Target', hidden_size=int(args.hidden_size),
-                                        learning_rate=float(args.learning_rate), 
-                                        action_size=int(args.action_size))
+    QNetwork = Network(name='QNetwork', hidden_size=args.hidden_size,
+                                        learning_rate=args.learning_rate, 
+                                        action_size=args.action_size)
+    target = Network(name='Target', hidden_size=args.hidden_size,
+                                        learning_rate=args.learning_rate, 
+                                        action_size=args.action_size)
 
     # model saver
     saver = tf.train.Saver()
 
     # initialize buffer, state memory, and result
-    buffer = deque(maxlen=int(args.buffer_size))
+    buffer = deque(maxlen=args.buffer_size)
 
     # Train the DQN
     with tf.Session() as sess: 
@@ -62,14 +62,14 @@ def main(args):
         count = 0
         
         # Make epsilon greedy schedule
-        epsilons = np.linspace(float(args.epsilon_start), float(args.epsilon_end), 100)
-        epsilons = list(epsilons) + list(np.repeat(.99, int(args.epochs) - len(epsilons)))
+        epsilons = np.linspace(args.epsilon_start, args.epsilon_end, 100)
+        epsilons = list(epsilons) + list(np.repeat(.99, args.epochs - len(epsilons)))
         
         # Set up memory for episode
         state = preprocess(env.reset())
 
         # Fill The Buffer
-        for i in range(int(args.buffer_size)):
+        for i in range(args.buffer_size):
             action = epsilon_greedy(sess, QNetwork, state)
             new_state, reward, done, _ = env.step(action)
             
@@ -87,7 +87,7 @@ def main(args):
         result = []
 
         # Train
-        for epoch in range(int(args.epochs)):
+        for epoch in range(args.epochs):
             result = []
             
             # Set Up Memory
@@ -109,7 +109,7 @@ def main(args):
                     state = new_state
                 
                 ### Sample & update
-                sample = random.sample(buffer, int(args.batch_size))
+                sample = random.sample(buffer, args.batch_size)
                 state_b, action_b, new_state_b, reward_b = map(np.array, zip(*sample))
 
                 # Find max Q-Value per batch for progress
@@ -129,7 +129,7 @@ def main(args):
                 
                 # Save target network parameters every epoch
                 count += 1
-                if count % int(args.reset_every) == 0:
+                if count % args.reset_every == 0:
                     copy_parameters(sess, QNetwork, target)
 
             # Log and save models
