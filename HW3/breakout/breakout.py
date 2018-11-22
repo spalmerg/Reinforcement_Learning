@@ -66,7 +66,8 @@ def main(args):
         count = 0
         
         # Make epsilon greedy schedule
-        epsilons = np.linspace(float(args.epsilon_start), float(args.epsilon_end), int(args.epochs))
+        epsilons = np.linspace(float(args.epsilon_start), float(args.epsilon_end), int((1/3) * int(args.epochs))
+        epsilons = list(epsilons) + list(np.repeat(.99, int((2/3) * int(args.epochs))))
         
         # Set up memory for episode
         start_state = preprocess(env.reset())
