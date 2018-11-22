@@ -19,8 +19,8 @@ parser.add_argument('--discount_rate', default=0.95, help='Discount rate for fut
 parser.add_argument('--epochs', default=10000, help='Number of epochs to train')
 parser.add_argument('--action_size', default=4, help='Number of actions in the game')
 parser.add_argument('--hidden_size', default=200, help='Number of hidden neurons in FC layers')
-parser.add_argument('--buffer_size', default=10000, help='Number of steps stored in the buffer')
-parser.add_argument('--batch_size', default=300, help='Number of steps sampled from buffer')
+parser.add_argument('--buffer_size', default=100000, help='Number of steps stored in the buffer')
+parser.add_argument('--batch_size', default=200, help='Number of steps sampled from buffer')
 parser.add_argument('--reset_every', default=100, help='Number of steps before reset target network')
 parser.add_argument('--memory_size', default=3, help='Number of memory frames stored per state')
 parser.add_argument('--epsilon_start', default=0.1, help='Start epsilon for epsilon greedy')
@@ -66,7 +66,7 @@ def main(args):
         count = 0
         
         # Make epsilon greedy schedule
-        epsilons = np.linspace(float(args.epsilon_start), float(args.epsilon_end), int((1/3) * int(args.epochs))
+        epsilons = np.linspace(float(args.epsilon_start), float(args.epsilon_end), int((1/3) * int(args.epochs)))
         epsilons = list(epsilons) + list(np.repeat(.99, int((2/3) * int(args.epochs))))
         
         # Set up memory for episode
