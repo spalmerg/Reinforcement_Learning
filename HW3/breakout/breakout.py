@@ -22,7 +22,6 @@ parser.add_argument('--hidden_size', default=200, help='Number of hidden neurons
 parser.add_argument('--buffer_size', default=100000, help='Number of steps stored in the buffer')
 parser.add_argument('--batch_size', default=200, help='Number of steps sampled from buffer')
 parser.add_argument('--reset_every', default=100, help='Number of steps before reset target network')
-parser.add_argument('--memory_size', default=3, help='Number of memory frames stored per state')
 parser.add_argument('--epsilon_start', default=0.1, help='Start epsilon for epsilon greedy')
 parser.add_argument('--epsilon_end', default=0.99, help='End epsilon for epsilon greedy')
 parser.add_argument('--log_dir', default='logs/breakout/', help='Path to logs for tensorboard visualization')
@@ -43,19 +42,16 @@ def main(args):
     tf.reset_default_graph()
     QNetwork = Network(name='QNetwork', hidden_size=int(args.hidden_size),
                                         learning_rate=float(args.learning_rate), 
-                                        action_size=int(args.action_size),
-                                        memory_size=int(args.memory_size))
+                                        action_size=int(args.action_size))
     target = Network(name='Target', hidden_size=int(args.hidden_size),
                                         learning_rate=float(args.learning_rate), 
-                                        action_size=int(args.action_size),
-                                        memory_size=int(args.memory_size))
+                                        action_size=int(args.action_size))
 
     # model saver
     saver = tf.train.Saver()
 
     # initialize buffer, state memory, and result
     buffer = deque(maxlen=int(args.buffer_size))
-    state_memory = deque(maxlen=int(args.memory_size))
 
     # Train the DQN
     with tf.Session() as sess: 
@@ -66,33 +62,26 @@ def main(args):
         count = 0
         
         # Make epsilon greedy schedule
-        epsilons = np.linspace(float(args.epsilon_start), float(args.epsilon_end), int((1/3) * int(args.epochs)))
-        epsilons = list(epsilons) + list(np.repeat(.99, int((2/3) * int(args.epochs))))
+        epsilons = np.linspace(float(args.epsilon_start), float(args.epsilon_end), 100)
+        epsilons = list(epsilons) + list(np.repeat(.99, int(args.epochs) - len(epsilons)))
         
         # Set up memory for episode
-        start_state = preprocess(env.reset())
-        for fill in range(int(args.memory_size)):
-            state_memory.append(start_state)
+        state = preprocess(env.reset())
 
         # Fill The Buffer
         for i in range(int(args.buffer_size)):
-            action = epsilon_greedy(sess, QNetwork, state_memory)
+            action = epsilon_greedy(sess, QNetwork, state)
             new_state, reward, done, _ = env.step(action)
             
-            # Save old_state_memory
-            old_state_memory = state_memory
-            
-            # Add new_state to state_memory
-            state_memory.append(preprocess(new_state))
-            
             # Add step to buffer
-            buffer.append([old_state_memory, action, state_memory, reward])
+            new_state = preprocess(new_state)
+            buffer.append([state, action, new_state, reward])
             
             # If done, reset memory
             if done: 
-                start_state = preprocess(env.reset())
-                for fill in range(int(args.memory_size)):
-                    state_memory.append(start_state)
+                state = preprocess(env.reset())
+            else: 
+                state = new_state
         
         # Initialize result for reporting
         result = []
@@ -102,28 +91,22 @@ def main(args):
             result = []
             
             # Set Up Memory
-            start_state = preprocess(env.reset())
-            
-            for fill in range(int(args.memory_size)):
-                state_memory.append(start_state)
-            
+            state = preprocess(env.reset())
+
             while True: 
                 # Add M to buffer (following policy)
-                action = epsilon_greedy(sess, QNetwork, state_memory, epsilons[epoch])
+                action = epsilon_greedy(sess, QNetwork, state, epsilons[epoch])
                 new_state, reward, done, _ = env.step(action)
-                
-                # Save old_state_memory
-                old_state_memory = state_memory
-                
-                # Add new_state to state_memory 
-                state_memory.append(preprocess(new_state))
-                
+            
                 # Add step to buffer
-                buffer.append([old_state_memory, action, state_memory, reward])
+                new_state = preprocess(new_state)
+                buffer.append([state, action, new_state, reward])
                 
                 # If simulation done, stop
                 if done:
                     break
+                else: 
+                    state = new_state
                 
                 ### Sample & update
                 sample = random.sample(buffer, int(args.batch_size))
@@ -146,7 +129,7 @@ def main(args):
                 
                 # Save target network parameters every epoch
                 count += 1
-                if count % args.reset_every == 0:
+                if count % int(args.reset_every) == 0:
                     copy_parameters(sess, QNetwork, target)
 
             # Log and save models
