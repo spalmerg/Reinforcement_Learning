@@ -37,9 +37,9 @@ class Network():
                                                                  activation_fn=None)
             
             # Get Prediction for the chosen action (epsilon greedy)
-            self.indices = tf.range(1) * tf.size(self.actions_) + self.actions_
-            self.chosen_action_pred = tf.gather(tf.reshape(self.predictions, [-1]), self.indices)
-            
+            self.action_one_hot = tf.one_hot(self.actions_, action_size, 1.0, 0.0, name='action_one_hot')
+            self.chosen_action_pred = tf.reduce_sum(self.predictions * self.action_one_hot, reduction_indices=-1)
+    
             # Calculate Loss
             # self.losses = tf.squared_difference(self.target_preds_, self.chosen_action_pred)
             self.losses = tf.losses.huber_loss(self.target_preds_, self.chosen_action_pred)
@@ -77,17 +77,8 @@ def epsilon_greedy(sess, network, state, epsilon=0.99):
 
 
 def copy_parameters(sess, q_network, target_network):
-    
-    # Get and sort parameters
-    q_params = [t for t in tf.trainable_variables() if t.name.startswith(q_network.scope)]
-    q_params = sorted(q_params, key=lambda v: v.name)
-    t_params = [t for t in tf.trainable_variables() if t.name.startswith(target_network.scope)]
-    t_params = sorted(t_params, key=lambda v: v.name)
-    
-    # Assign Q-Parameters to Target Network
-    updates = []
-    for q_v, t_v in zip(q_params, t_params):
-        update = t_v.assign(q_v)
-        updates.append(update)
-    
-    sess.run(updates)
+
+    q_vars = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope=q_network.scope)
+    t_vars = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope=target_network.scope)
+
+    sess.run([v_t.assign(v) for v_t, v in zip(t_vars, q_vars)])

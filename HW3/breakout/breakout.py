@@ -121,7 +121,7 @@ def main(args):
             
                 # Target Network Predictions + Discount
                 TPredictions = target.predict(sess, new_state_b)
-                max_Qt = float(args.discount_rate) * np.max(TPredictions, axis=1)
+                max_Qt = args.discount_rate * np.max(TPredictions, axis=1)
                 action_Ts = reward_b + max_Qt
 
                 # Update Q-Network
