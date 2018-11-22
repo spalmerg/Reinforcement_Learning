@@ -14,7 +14,7 @@ os.environ["CUDA_VISIBLE_DEVICES"]="1"
 
 parser = argparse.ArgumentParser(description='DQN for Breakout Game')
 
-parser.add_argument('--learning_rate', default=0.01, help='Learning rate for optimizer')
+parser.add_argument('--learning_rate', default=0.0005, help='Learning rate for optimizer')
 parser.add_argument('--discount_rate', default=0.95, help='Discount rate for future rewards')
 parser.add_argument('--epochs', default=10000, help='Number of epochs to train')
 parser.add_argument('--action_size', default=4, help='Number of actions in the game')
