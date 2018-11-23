@@ -22,7 +22,7 @@ parser.add_argument('--hidden_size', default=200, help='Number of hidden neurons
 parser.add_argument('--buffer_size', default=100000, help='Number of steps stored in the buffer')
 parser.add_argument('--batch_size', default=1000, help='Number of steps sampled from buffer')
 parser.add_argument('--reset_every', default=100, help='Number of steps before reset target network')
-parser.add_argument('--epsilon_explore', default=3000, help='Number of epochs to explore')
+parser.add_argument('--epsilon_explore', default=1500, help='Number of epochs to explore')
 parser.add_argument('--epsilon_start', default=0.1, help='Start epsilon for epsilon greedy')
 parser.add_argument('--epsilon_end', default=0.99, help='End epsilon for epsilon greedy')
 parser.add_argument('--log_dir', default='logs/breakout/', help='Path to logs for tensorboard visualization')
