@@ -3,7 +3,7 @@ import gym.spaces
 import numpy as np
 import tensorflow as tf
 import matplotlib.pyplot as plt
-import helper
+from helper import preprocess, Network
 
 def main(): 
     # initialize networks
