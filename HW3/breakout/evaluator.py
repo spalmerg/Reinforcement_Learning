@@ -12,7 +12,7 @@ def main():
 
     # load game
     with tf.Session() as sess:
-        saver.restore(sess, 'model/model1000.ckpt.index') ## add last checkpoint
+        saver.restore(sess, 'model/model1000.ckpt.meta') ## add last checkpoint
         for game in range(1000):
             # start game
             state = preprocess(env.reset())
