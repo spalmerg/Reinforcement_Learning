@@ -53,4 +53,5 @@ def main(args):
         plt.savefig('Breakout_Rewards.png')
 
 if __name__ == "__main__":
-    main()
+    args = parser.parse_args()
+    main(args)
