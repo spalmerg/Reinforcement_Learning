@@ -6,6 +6,11 @@ import matplotlib.pyplot as plt
 import helper
 
 def main(): 
+    # initialize networks
+    tf.reset_default_graph()
+    QNetwork = Network(name = 'QNetwork', hidden_size=hidden_size, learning_rate=learning_rate)
+    target = Network(name = 'Target', hidden_size=hidden_size, learning_rate=learning_rate)
+
     # saver
     saver = tf.train.Saver()
     all_rewards = []
