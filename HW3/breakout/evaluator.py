@@ -14,7 +14,7 @@ parser.add_argument('--action_size', default=4, help='Number of actions in the g
 parser.add_argument('--games', default=1000, help="Number of games to play")
 
 
-def main(): 
+def main(args): 
     # initialize networks
     tf.reset_default_graph()
     QNetwork = Network(name='QNetwork', hidden_size=args.hidden_size,
