@@ -5,11 +5,21 @@ import tensorflow as tf
 import matplotlib.pyplot as plt
 from helper import preprocess, Network
 
+parser.add_argument('--hidden_size', default=200, help='Number of hidden neurons in FC layers')
+parser.add_argument('--learning_rate', default=0.0005, help='Learning rate for optimizer')
+parser.add_argument('--action_size', default=4, help='Number of actions in the game')
+parser.add_argument('--games', default=1000, help="Number of games to play")
+
+
 def main(): 
     # initialize networks
     tf.reset_default_graph()
-    QNetwork = Network(name = 'QNetwork', hidden_size=hidden_size, learning_rate=learning_rate)
-    target = Network(name = 'Target', hidden_size=hidden_size, learning_rate=learning_rate)
+    QNetwork = Network(name='QNetwork', hidden_size=args.hidden_size,
+                                        learning_rate=args.learning_rate, 
+                                        action_size=args.action_size)
+    target = Network(name='Target', hidden_size=args.hidden_size,
+                                        learning_rate=args.learning_rate, 
+                                        action_size=args.action_size)
 
     # saver
     saver = tf.train.Saver()
@@ -18,7 +28,7 @@ def main():
     # load game
     with tf.Session() as sess:
         saver.restore(sess, 'model/model1000.ckpt.meta') ## add last checkpoint
-        for game in range(1000):
+        for game in range(args.games):
             # start game
             state = preprocess(env.reset())
             reward_total = 0
