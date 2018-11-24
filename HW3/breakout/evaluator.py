@@ -6,6 +6,8 @@ import tensorflow as tf
 import matplotlib.pyplot as plt
 from helper import preprocess, Network
 
+parser = argparse.ArgumentParser(description='DQN for Breakout Game')
+
 parser.add_argument('--hidden_size', default=200, help='Number of hidden neurons in FC layers')
 parser.add_argument('--learning_rate', default=0.0005, help='Learning rate for optimizer')
 parser.add_argument('--action_size', default=4, help='Number of actions in the game')
