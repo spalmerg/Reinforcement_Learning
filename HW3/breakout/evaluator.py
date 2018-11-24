@@ -7,11 +7,11 @@ import helper
 
 def main(): 
     # saver
-    saver = tf.train.Saver()
     all_rewards = []
 
     # load game
     with tf.Session() as sess:
+        saver = tf.train.Saver()
         saver.restore(sess, 'model/model1000.ckpt.index') ## add last checkpoint
         for game in range(1000):
             # start game
