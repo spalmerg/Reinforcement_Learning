@@ -39,7 +39,6 @@ def main(args):
         saver.restore(sess, "model/model1200.ckpt")
         print("MODEL RESTORED")
         for game in range(args.games):
-            print("STARTING GAME")
             # start game
             state = preprocess(env.reset())
             reward_total = 0
