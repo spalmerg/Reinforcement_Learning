@@ -56,8 +56,12 @@ def main(args):
 
     # Train the DQN
     with tf.Session() as sess: 
+
         writer = tf.summary.FileWriter(os.path.join(args.log_dir, args.run_num), sess.graph)
-        sess.run(tf.global_variables_initializer())
+        # restore checkpoint
+        saver.restore(sess, "model/model1200.ckpt")
+        # start new model
+        # sess.run(tf.global_variables_initializer())
         
         # Set up count for network reset
         count = 0
@@ -136,7 +140,7 @@ def main(args):
             # Log and save models
             logger.info("Epoch: {0}\tAvg Reward: {1}".format(epoch, np.mean(result)))
             writer.add_summary(summary, epoch)
-            if epoch % 100 == 0:
+            if epoch % 20 == 0:
                     saver.save(sess, "./model/model{0}.ckpt".format(epoch))
 
 if __name__ == "__main__":
