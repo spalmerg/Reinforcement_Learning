@@ -38,7 +38,7 @@ def main(args):
 
     # load game
     with tf.Session() as sess:
-        saver.restore(sess, 'model/model1000.ckpt') ## add last checkpoint
+        saver.restore(sess, 'model/model1100.ckpt') ## add last checkpoint
         for game in range(args.games):
             # start game
             state = preprocess(env.reset())
@@ -46,6 +46,7 @@ def main(args):
             while True: 
                 action = np.argmax(QNetwork.predict(sess, [state]))
                 new_state, reward, done, _ = env.step(action)
+                print(reward)
                 
                 if done:
                     break
