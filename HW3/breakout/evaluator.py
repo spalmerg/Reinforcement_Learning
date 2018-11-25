@@ -6,8 +6,11 @@ import tensorflow as tf
 import matplotlib.pyplot as plt
 from helper import preprocess, Network
 
-parser = argparse.ArgumentParser(description='DQN for Breakout Game')
+# GPU
+os.environ["CUDA_VISIBLE_DEVICES"]="1"
 
+# Arguments
+parser = argparse.ArgumentParser(description='DQN for Breakout Game')
 parser.add_argument('--hidden_size', default=200, help='Number of hidden neurons in FC layers')
 parser.add_argument('--learning_rate', default=0.0005, help='Learning rate for optimizer')
 parser.add_argument('--action_size', default=4, help='Number of actions in the game')
@@ -15,6 +18,10 @@ parser.add_argument('--games', default=1000, help="Number of games to play")
 
 
 def main(args): 
+    # set up and reset game environment 
+    env = gym.make('Breakout-v0')
+    env.reset()
+
     # initialize networks
     tf.reset_default_graph()
     QNetwork = Network(name='QNetwork', hidden_size=args.hidden_size,
