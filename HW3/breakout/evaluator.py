@@ -25,9 +25,9 @@ def main(args):
 
     # initialize networks
     # tf.reset_default_graph()
-    # QNetwork = Network(name='QNetwork', hidden_size=args.hidden_size,
-    #                                     learning_rate=args.learning_rate, 
-    #                                     action_size=args.action_size)
+    QNetwork = Network(name='QNetwork', hidden_size=args.hidden_size,
+                                        learning_rate=args.learning_rate, 
+                                        action_size=args.action_size)
     # target = Network(name='Target', hidden_size=args.hidden_size,
     #                                     learning_rate=args.learning_rate, 
     #                                     action_size=args.action_size)
