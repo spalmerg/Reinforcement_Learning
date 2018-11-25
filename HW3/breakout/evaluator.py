@@ -40,9 +40,10 @@ def main(args):
 
     # load game
     with tf.Session() as sess:
-        saver = tf.train.import_meta_graph('model/model1200.ckpt.meta')
-        saver.restore(sess,tf.train.latest_checkpoint('model/')) ## add last checkpoint
+        saver = tf.train.import_meta_graph('model/model900.ckpt.meta')
+        saver.restore(sess, 'model900.ckpt.index')#tf.train.latest_checkpoint('model/')) ## add last checkpoint
         for game in range(args.games):
+            print("STARTING GAME")
             # start game
             state = preprocess(env.reset())
             reward_total = 0
