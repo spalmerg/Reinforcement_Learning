@@ -24,7 +24,6 @@ def main(args):
     env.reset()
 
     # initialize networks
-    # tf.reset_default_graph()
     QNetwork = Network(name='QNetwork', hidden_size=args.hidden_size,
                                         learning_rate=args.learning_rate, 
                                         action_size=args.action_size)
@@ -32,11 +31,7 @@ def main(args):
                                         learning_rate=args.learning_rate, 
                                         action_size=args.action_size)
 
-    # saver
-    # saver = tf.train.import_meta_graph('model/model1200.ckpt.meta')
     saver = tf.train.Saver()
-    
-    # all_rewards = []
 
     # load game
     with tf.Session() as sess:
@@ -51,21 +46,13 @@ def main(args):
             while True: 
                 action = np.argmax(QNetwork.predict(sess, [state]))
                 new_state, reward, done, _ = env.step(action)
-                if reward > 0: 
-                    print("WE WIN")
                 
                 if done:
                     break
                 else:
                     state = preprocess(new_state)
                     reward_total = reward_total + reward
-            print(reward_total)        
-            # all_rewards.append(reward_total)
-        # fig = plt.hist(all_rewards)
-        # plt.title('Breakout Rewards (1000 Games)')
-        # plt.xlabel('Number of Games')
-        # plt.ylabel('Reward Scored')
-        # plt.savefig('Breakout_Rewards.png')
+            print(reward_total)  
 
 if __name__ == "__main__":
     args = parser.parse_args()
