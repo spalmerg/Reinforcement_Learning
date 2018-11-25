@@ -49,6 +49,7 @@ def main(args):
             while True: 
                 action = np.argmax(QNetwork.predict(sess, [state]))
                 new_state, reward, done, _ = env.step(action)
+                print(reward)
                 
                 if done:
                     break
