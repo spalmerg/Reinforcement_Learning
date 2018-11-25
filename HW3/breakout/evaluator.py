@@ -34,7 +34,7 @@ def main(args):
 
     # saver
     saver = tf.train.Saver()
-    all_rewards = []
+    # all_rewards = []
 
     # load game
     with tf.Session() as sess:
@@ -52,13 +52,13 @@ def main(args):
                 else: 
                     state = preprocess(new_state)
                     reward_total += reward
-                    
-            all_rewards.append(reward_total)
-        fig = plt.hist(all_rewards)
-        plt.title('Breakout Rewards (1000 Games)')
-        plt.xlabel('Number of Games')
-        plt.ylabel('Reward Scored')
-        plt.savefig('Breakout_Rewards.png')
+            print(reward_total)        
+            # all_rewards.append(reward_total)
+        # fig = plt.hist(all_rewards)
+        # plt.title('Breakout Rewards (1000 Games)')
+        # plt.xlabel('Number of Games')
+        # plt.ylabel('Reward Scored')
+        # plt.savefig('Breakout_Rewards.png')
 
 if __name__ == "__main__":
     args = parser.parse_args()
