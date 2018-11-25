@@ -24,21 +24,24 @@ def main(args):
     env.reset()
 
     # initialize networks
-    tf.reset_default_graph()
-    QNetwork = Network(name='QNetwork', hidden_size=args.hidden_size,
-                                        learning_rate=args.learning_rate, 
-                                        action_size=args.action_size)
-    target = Network(name='Target', hidden_size=args.hidden_size,
-                                        learning_rate=args.learning_rate, 
-                                        action_size=args.action_size)
+    # tf.reset_default_graph()
+    # QNetwork = Network(name='QNetwork', hidden_size=args.hidden_size,
+    #                                     learning_rate=args.learning_rate, 
+    #                                     action_size=args.action_size)
+    # target = Network(name='Target', hidden_size=args.hidden_size,
+    #                                     learning_rate=args.learning_rate, 
+    #                                     action_size=args.action_size)
 
     # saver
-    saver = tf.train.Saver()
+    # saver = tf.train.import_meta_graph('model/model1200.ckpt.meta')
+    # saver = tf.train.Saver()
+    
     # all_rewards = []
 
     # load game
     with tf.Session() as sess:
-        saver.restore(sess, 'model/model1100.ckpt.index') ## add last checkpoint
+        saver = tf.train.import_meta_graph('model/model1200.ckpt.meta')
+        saver.restore(sess,tf.train.latest_checkpoint('model/')) ## add last checkpoint
         for game in range(args.games):
             # start game
             state = preprocess(env.reset())
@@ -49,7 +52,7 @@ def main(args):
                 
                 if done:
                     break
-                else: 
+                else: e
                     state = preprocess(new_state)
                     reward_total += reward
             print(reward_total)        
