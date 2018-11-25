@@ -28,9 +28,9 @@ def main(args):
     QNetwork = Network(name='QNetwork', hidden_size=args.hidden_size,
                                         learning_rate=args.learning_rate, 
                                         action_size=args.action_size)
-    # target = Network(name='Target', hidden_size=args.hidden_size,
-    #                                     learning_rate=args.learning_rate, 
-    #                                     action_size=args.action_size)
+    target = Network(name='Target', hidden_size=args.hidden_size,
+                                        learning_rate=args.learning_rate, 
+                                        action_size=args.action_size)
 
     # saver
     # saver = tf.train.import_meta_graph('model/model1200.ckpt.meta')
