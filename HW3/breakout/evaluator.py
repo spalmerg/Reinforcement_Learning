@@ -52,7 +52,7 @@ def main(args):
                 
                 if done:
                     break
-                else: e
+                else:
                     state = preprocess(new_state)
                     reward_total += reward
             print(reward_total)        
