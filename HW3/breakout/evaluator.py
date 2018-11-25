@@ -41,10 +41,8 @@ def main(args):
     # load game
     with tf.Session() as sess:
         print("SESSION STARTED")
-        saver.restore(sess, "model/model900.ckpt")
+        saver.restore(sess, "model/model1200.ckpt")
         print("MODEL RESTORED")
-        # saver = tf.train.import_meta_graph('model/model900.ckpt.meta')
-        # saver.restore(sess, 'model900.ckpt.index')#tf.train.latest_checkpoint('model/')) ## add last checkpoint
         for game in range(args.games):
             print("STARTING GAME")
             # start game
@@ -53,13 +51,12 @@ def main(args):
             while True: 
                 action = np.argmax(QNetwork.predict(sess, [state]))
                 new_state, reward, done, _ = env.step(action)
-                print(reward)
                 
                 if done:
                     break
                 else:
                     state = preprocess(new_state)
-                    reward_total += reward
+                    reward_total = reward_total + reward
             print(reward_total)        
             # all_rewards.append(reward_total)
         # fig = plt.hist(all_rewards)
