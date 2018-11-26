@@ -21,7 +21,7 @@ parser.add_argument('--action_size', default=4, help='Number of actions in the g
 parser.add_argument('--hidden_size', default=200, help='Number of hidden neurons in FC layers')
 parser.add_argument('--buffer_size', default=100000, help='Number of steps stored in the buffer')
 parser.add_argument('--batch_size', default=2000, help='Number of steps sampled from buffer')
-parser.add_argument('--memory_size', default=2, help='Number of memory frames stored per state')
+parser.add_argument('--memory_size', default=3, help='Number of memory frames stored per state')
 parser.add_argument('--reset_every', default=4, help='Number of steps before reset target network')
 parser.add_argument('--epsilon_explore', default=300, help='Number of epochs to explore')
 parser.add_argument('--epsilon_start', default=0.1, help='Start epsilon for epsilon greedy')
@@ -91,7 +91,9 @@ def main(args):
             state_memory.append(preprocess(new_state))
 
             # Add step to buffer
-            buffer.append([old_state_memory, action, state_memory, reward])
+            old_state_memory_reshape = np.reshape(old_state_memory, [80, 80, args.memory_size])
+            state_memory_reshape = np.reshape(state_memory, [80, 80, args.memory_size])
+            buffer.append([old_state_memory_reshape, action, state_memory_reshape, reward])
 
             # If done, reset memory
             if done:
@@ -123,13 +125,15 @@ def main(args):
                 state_memory.append(preprocess(new_state))
             
                 # Add step to buffer
-                buffer.append([old_state_memory, action, state_memory, reward])
+                old_state_memory_reshape = np.reshape(old_state_memory, [80, 80, args.memory_size])
+                state_memory_reshape = np.reshape(state_memory, [80, 80, args.memory_size])
+                buffer.append([old_state_memory_reshape, action, state_memory_reshape, reward])
                 
                 # If simulation done, stop
                 if done:
                     break
                 
-                ### Sample & update
+                ### Sample & Update
                 sample = random.sample(buffer, args.batch_size)
                 state_b, action_b, new_state_b, reward_b = map(np.array, zip(*sample))
 
