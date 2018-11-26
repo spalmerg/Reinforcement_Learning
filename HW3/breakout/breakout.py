@@ -90,14 +90,14 @@ def main(args):
             # Add new_state to state_memory
             state_memory.append(preprocess(new_state))
 
-            # Add step to buffer
-            buffer.append([old_state_memory, action, state_memory, reward])
-            
             # If done, reset memory
             if done:
                 start_state = preprocess(env.reset())
                 for fill in range(args.memory_size):
                     state_memory.append(start_state)
+            else: 
+                # Add step to buffer
+                buffer.append([old_state_memory, action, state_memory, reward])
         
         # Initialize result for reporting
         result = []

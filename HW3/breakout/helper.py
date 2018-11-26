@@ -12,22 +12,29 @@ def preprocess(image):
 
 
 class Network():
-    def __init__(self, learning_rate=0.01, hidden_size=10, action_size = 4, memory_size=4, name="QEstimator"):
+    def __init__(self, learning_rate=0.01, hidden_size=10, action_size = 2, memory_size=4, name="QEstimator"):
         with tf.variable_scope(name):
             # Set scope for copying purposes
             self.scope = name
 
             # Store Variables
-            self.inputs_ = tf.placeholder(tf.float32, [None, memory_size, 80, 80], name='inputs')
+            self.inputs_ = tf.placeholder(tf.float32, [None, 80, 80, memory_size], name='inputs')
             self.target_preds_ = tf.placeholder(tf.float32, [None,], name="expected_future_rewards")
             self.chosen_action_pred = tf.placeholder(tf.float32, [None,], name="chosen_action_pred")
             self.actions_ = tf.placeholder(tf.int32, shape=[None], name='actions')
             self.avg_reward_ = tf.placeholder(tf.float32, name="avg_reward")
             
             # Three Convolutional Layers
-            self.conv1 = tf.contrib.layers.conv2d(self.inputs_, 32, 8, 4, activation_fn=tf.nn.relu)
-            self.conv2 = tf.contrib.layers.conv2d(self.conv1, 64, 4, 2, activation_fn=tf.nn.relu)
-            self.conv3 = tf.contrib.layers.conv2d(self.conv2, 64, 3, 1, activation_fn=tf.nn.relu)
+            init = tf.truncated_normal_initializer(mean=0.0, stddev=2e-2)
+            self.conv1 = tf.contrib.layers.conv2d(self.inputs_, 16, 8, 4, activation_fn=tf.nn.relu, 
+                                                    padding='valid',
+                                                    weights_initializer=init)
+            self.conv2 = tf.contrib.layers.conv2d(self.conv1, 32, 4, 2, activation_fn=tf.nn.relu,
+                                                    padding='valid',
+                                                    weights_initializer=init)
+            self.conv3 = tf.contrib.layers.conv2d(self.conv2, 64, 3, 1, activation_fn=tf.nn.relu,
+                                                    padding='valid',  
+                                                    weights_initializer=init)
 
             # Fully Connected Layers
             self.flatten = tf.contrib.layers.flatten(self.conv3)
@@ -46,7 +53,7 @@ class Network():
             self.loss = tf.reduce_mean(self.losses)
             
             # Adjust Network
-            self.learn = tf.train.AdamOptimizer(learning_rate).minimize(self.losses)
+            self.learn = tf.train.RMSPropOptimizer(learning_rate).minimize(self.losses)
 
             # For Tensorboard
             with tf.name_scope("summaries"):
@@ -68,7 +75,7 @@ class Network():
 
 
 def epsilon_greedy(sess, network, state, epsilon=0.99):
-    state = np.stack(list(state))
+    state = np.stack(list(state), axis=2)
     pick = np.random.rand() # Uniform random number generator
     if pick > epsilon: # If off policy -- random action
         action = np.random.randint(0,4)
