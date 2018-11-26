@@ -25,7 +25,7 @@ class Network():
             self.avg_reward_ = tf.placeholder(tf.float32, name="avg_reward")
             
             # Three Convolutional Layers
-            init = tf.truncated_normal_initializer(mean=0.0, stddev=2e-2)
+            init = tf.variance_scaling_initializer(scale=2)
             self.conv1 = tf.contrib.layers.conv2d(self.inputs_, 16, 8, 4, activation_fn=tf.nn.relu, 
                                                     padding='valid',
                                                     weights_initializer=init)

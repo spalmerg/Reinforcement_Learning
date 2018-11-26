@@ -14,16 +14,16 @@ os.environ["CUDA_VISIBLE_DEVICES"]="1"
 
 parser = argparse.ArgumentParser(description='DQN for Breakout Game')
 
-parser.add_argument('--learning_rate', default=0.0005, help='Learning rate for optimizer')
+parser.add_argument('--learning_rate', default=0.0002, help='Learning rate for optimizer')
 parser.add_argument('--discount_rate', default=0.95, help='Discount rate for future rewards')
 parser.add_argument('--epochs', default=10000, help='Number of epochs to train')
 parser.add_argument('--action_size', default=4, help='Number of actions in the game')
 parser.add_argument('--hidden_size', default=200, help='Number of hidden neurons in FC layers')
 parser.add_argument('--buffer_size', default=100000, help='Number of steps stored in the buffer')
-parser.add_argument('--batch_size', default=1000, help='Number of steps sampled from buffer')
-parser.add_argument('--memory_size', default=4, help='Number of memory frames stored per state')
-parser.add_argument('--reset_every', default=100, help='Number of steps before reset target network')
-parser.add_argument('--epsilon_explore', default=700, help='Number of epochs to explore')
+parser.add_argument('--batch_size', default=2000, help='Number of steps sampled from buffer')
+parser.add_argument('--memory_size', default=2, help='Number of memory frames stored per state')
+parser.add_argument('--reset_every', default=4, help='Number of steps before reset target network')
+parser.add_argument('--epsilon_explore', default=300, help='Number of epochs to explore')
 parser.add_argument('--epsilon_start', default=0.1, help='Start epsilon for epsilon greedy')
 parser.add_argument('--epsilon_end', default=0.99, help='End epsilon for epsilon greedy')
 parser.add_argument('--log_dir', default='logs/breakout/', help='Path to logs for tensorboard visualization')
@@ -90,14 +90,14 @@ def main(args):
             # Add new_state to state_memory
             state_memory.append(preprocess(new_state))
 
+            # Add step to buffer
+            buffer.append([old_state_memory, action, state_memory, reward])
+
             # If done, reset memory
             if done:
                 start_state = preprocess(env.reset())
                 for fill in range(args.memory_size):
                     state_memory.append(start_state)
-            else: 
-                # Add step to buffer
-                buffer.append([old_state_memory, action, state_memory, reward])
         
         # Initialize result for reporting
         result = []
