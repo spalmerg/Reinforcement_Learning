@@ -21,7 +21,7 @@ parser.add_argument('--action_size', default=4, help='Number of actions in the g
 parser.add_argument('--hidden_size', default=512, help='Number of hidden neurons in FC layers')
 parser.add_argument('--buffer_size', default=100000, help='Number of steps stored in the buffer')
 parser.add_argument('--batch_size', default=2000, help='Number of steps sampled from buffer')
-parser.add_argument('--memory_size', default=1, help='Number of memory frames stored per state')
+parser.add_argument('--memory_size', default=3, help='Number of memory frames stored per state')
 parser.add_argument('--reset_every', default=100, help='Number of steps before reset target network')
 parser.add_argument('--epsilon_explore', default=300, help='Number of epochs to explore')
 parser.add_argument('--epsilon_start', default=0.1, help='Start epsilon for epsilon greedy')
