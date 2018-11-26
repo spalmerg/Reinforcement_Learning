@@ -22,7 +22,7 @@ parser.add_argument('--hidden_size', default=200, help='Number of hidden neurons
 parser.add_argument('--buffer_size', default=100000, help='Number of steps stored in the buffer')
 parser.add_argument('--batch_size', default=2000, help='Number of steps sampled from buffer')
 parser.add_argument('--memory_size', default=3, help='Number of memory frames stored per state')
-parser.add_argument('--reset_every', default=4, help='Number of steps before reset target network')
+parser.add_argument('--reset_every', default=100, help='Number of steps before reset target network')
 parser.add_argument('--epsilon_explore', default=300, help='Number of epochs to explore')
 parser.add_argument('--epsilon_start', default=0.1, help='Start epsilon for epsilon greedy')
 parser.add_argument('--epsilon_end', default=0.99, help='End epsilon for epsilon greedy')
@@ -79,7 +79,7 @@ def main(args):
             state_memory.append(start_state)
 
         # Fill The Buffer
-        for i in range(args.buffer_size):
+        for i in range(args.buffer_size/4):
             # take action based on state & epsilon greedy
             action = epsilon_greedy(sess, QNetwork, state_memory)
             new_state, reward, done, _ = env.step(action)
