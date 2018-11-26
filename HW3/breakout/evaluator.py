@@ -5,6 +5,7 @@ import numpy as np
 import tensorflow as tf
 import matplotlib.pyplot as plt
 from helper import preprocess, Network
+from collections import deque
 import os
 
 # GPU
