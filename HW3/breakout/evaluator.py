@@ -49,8 +49,8 @@ def main(args):
 
             reward_total = 0
             while True: 
-
-                action = np.argmax(QNetwork.predict(sess, state_memory))
+                state_formatted = np.stack(list(state_memory))
+                action = np.argmax(QNetwork.predict(sess, state_formatted))
                 new_state, reward, done, _ = env.step(action)
 
                 # Save old_state_memory
