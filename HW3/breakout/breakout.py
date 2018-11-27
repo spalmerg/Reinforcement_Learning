@@ -10,21 +10,21 @@ from collections import deque
 import random
 from helper import preprocess, Network, epsilon_greedy, copy_parameters
 
-os.environ["CUDA_VISIBLE_DEVICES"]="3"
+os.environ["CUDA_VISIBLE_DEVICES"]="0"
 
 parser = argparse.ArgumentParser(description='DQN for Breakout Game')
 
-parser.add_argument('--learning_rate', default=0.00002, help='Learning rate for optimizer')
+parser.add_argument('--learning_rate', default=0.000025, help='Learning rate for optimizer')
 parser.add_argument('--discount_rate', default=0.95, help='Discount rate for future rewards')
 parser.add_argument('--epochs', default=10000, help='Number of epochs to train')
 parser.add_argument('--action_size', default=4, help='Number of actions in the game')
 parser.add_argument('--hidden_size', default=512, help='Number of hidden neurons in FC layers')
-parser.add_argument('--buffer_size', default=100000, help='Number of steps stored in the buffer')
-parser.add_argument('--batch_size', default=400, help='Number of steps sampled from buffer')
+parser.add_argument('--buffer_size', default=1000000, help='Number of steps stored in the buffer')
+parser.add_argument('--batch_size', default=100, help='Number of steps sampled from buffer')
 parser.add_argument('--memory_size', default=4, help='Number of memory frames stored per state')
 parser.add_argument('--reset_every', default=100, help='Number of steps before reset target network')
 parser.add_argument('--update_every', default=4, help='Number of episodes to play before updating network')
-parser.add_argument('--epsilon_explore', default=1500, help='Number of epochs to explore')
+parser.add_argument('--epsilon_explore', default=2000, help='Number of epochs to explore')
 parser.add_argument('--epsilon_start', default=0.1, help='Start epsilon for epsilon greedy')
 parser.add_argument('--epsilon_end', default=0.9, help='End epsilon for epsilon greedy')
 parser.add_argument('--log_dir', default='logs/breakout/', help='Path to logs for tensorboard visualization')
@@ -80,7 +80,7 @@ def main(args):
             state_memory.append(start_state)
 
         # Fill The Buffer
-        for i in range(args.buffer_size//2):
+        for i in range(args.buffer_size//4):
             # take action based on state & epsilon greedy
             action = epsilon_greedy(sess, QNetwork, state_memory)
             new_state, reward, done, _ = env.step(action)
@@ -106,7 +106,7 @@ def main(args):
         result = []
 
         # Train
-        for epoch in range(900, args.epochs):
+        for epoch in range(args.epochs):
             result = []
             
             # Set Up Memory
