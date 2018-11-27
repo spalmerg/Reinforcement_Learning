@@ -17,7 +17,7 @@ parser.add_argument('--hidden_size', default=200, help='Number of hidden neurons
 parser.add_argument('--learning_rate', default=0.0002, help='Learning rate for optimizer')
 parser.add_argument('--action_size', default=4, help='Number of actions in the game')
 parser.add_argument('--games', default=1000, help="Number of games to play")
-parser.add_argument('--memory_size', default=2, help='Number of memory frames stored per state')
+parser.add_argument('--memory_size', default=3, help='Number of memory frames stored per state')
 
 
 def main(args): 
