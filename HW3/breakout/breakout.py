@@ -63,9 +63,9 @@ def main(args):
     with tf.Session() as sess: 
         writer = tf.summary.FileWriter(os.path.join(args.log_dir, args.run_num), sess.graph)
         # restore checkpoint
-        saver.restore(sess, "model/model900.ckpt")
+        #saver.restore(sess, "model/model900.ckpt")
         # start new model
-        #sess.run(tf.global_variables_initializer())
+        sess.run(tf.global_variables_initializer())
         
         # Set up count for network reset
         count = 0
