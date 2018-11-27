@@ -39,7 +39,7 @@ def main(args):
     # load game
     with tf.Session() as sess:
         print("SESSION STARTED")
-        saver.restore(sess, "model/model40.ckpt")
+        saver.restore(sess, "model/model80.ckpt")
         print("MODEL RESTORED")
         for game in range(args.games):
             # start game & initialize memory
