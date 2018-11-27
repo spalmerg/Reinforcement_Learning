@@ -19,7 +19,7 @@ parser.add_argument('--discount_rate', default=0.95, help='Discount rate for fut
 parser.add_argument('--epochs', default=10000, help='Number of epochs to train')
 parser.add_argument('--action_size', default=4, help='Number of actions in the game')
 parser.add_argument('--hidden_size', default=512, help='Number of hidden neurons in FC layers')
-parser.add_argument('--buffer_size', default=1000000, help='Number of steps stored in the buffer')
+parser.add_argument('--buffer_size', default=100000, help='Number of steps stored in the buffer')
 parser.add_argument('--batch_size', default=100, help='Number of steps sampled from buffer')
 parser.add_argument('--memory_size', default=4, help='Number of memory frames stored per state')
 parser.add_argument('--reset_every', default=100, help='Number of steps before reset target network')
