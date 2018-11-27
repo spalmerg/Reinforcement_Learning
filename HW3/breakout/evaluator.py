@@ -9,7 +9,7 @@ from collections import deque
 import os
 
 # GPU
-os.environ["CUDA_VISIBLE_DEVICES"]="2"
+os.environ["CUDA_VISIBLE_DEVICES"]="0"
 
 # Arguments
 parser = argparse.ArgumentParser(description='DQN for Breakout Game')
@@ -39,7 +39,7 @@ def main(args):
     # load game
     with tf.Session() as sess:
         print("SESSION STARTED")
-        saver.restore(sess, "model/model80.ckpt")
+        saver.restore(sess, "model/model860.ckpt")
         print("MODEL RESTORED")
         for game in range(args.games):
             # start game & initialize memory
