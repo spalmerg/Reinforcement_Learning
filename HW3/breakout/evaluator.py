@@ -9,7 +9,7 @@ from collections import deque
 import os
 
 # GPU
-os.environ["CUDA_VISIBLE_DEVICES"]="1"
+os.environ["CUDA_VISIBLE_DEVICES"]="2"
 
 # Arguments
 parser = argparse.ArgumentParser(description='DQN for Breakout Game')

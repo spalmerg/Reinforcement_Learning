@@ -12,7 +12,7 @@ def preprocess(image):
 
 
 class Network():
-    def __init__(self, learning_rate=0.01, hidden_size=10, action_size = 2, memory_size=4, name="QEstimator"):
+    def __init__(self, learning_rate=0.01, hidden_size=10, action_size = 4, memory_size=4, name="QEstimator"):
         with tf.variable_scope(name):
             # Set scope for copying purposes
             self.scope = name
@@ -22,7 +22,7 @@ class Network():
             self.target_preds_ = tf.placeholder(tf.float32, [None,], name="expected_future_rewards")
             self.chosen_action_pred = tf.placeholder(tf.float32, [None,], name="chosen_action_pred")
             self.actions_ = tf.placeholder(tf.int32, shape=[None], name='actions')
-            self.avg_reward_ = tf.placeholder(tf.float32, name="avg_reward")
+            self.avg_max_Q = tf.placeholder(tf.float32, name="avg_max_Q")
             
             # Three Convolutional Layers
             init = tf.variance_scaling_initializer(scale=2)
@@ -38,9 +38,10 @@ class Network():
 
             # Fully Connected Layers
             self.flatten = tf.contrib.layers.flatten(self.conv3)
-            self.fc1 = tf.contrib.layers.fully_connected(self.flatten, hidden_size)
+            self.fc1 = tf.contrib.layers.fully_connected(self.flatten, hidden_size, 
+                                                                 weights_initializer=init)
             self.predictions = tf.contrib.layers.fully_connected(self.fc1, action_size,
-                                                                 weights_initializer=tf.contrib.layers.xavier_initializer(), 
+                                                                 weights_initializer=init, 
                                                                  activation_fn=None)
             
             # Get Prediction for the chosen action (epsilon greedy)
@@ -53,12 +54,12 @@ class Network():
             self.loss = tf.reduce_mean(self.losses)
             
             # Adjust Network
-            self.learn = tf.train.RMSPropOptimizer(learning_rate).minimize(self.losses)
+            self.learn = tf.train.AdamOptimizer(learning_rate).minimize(self.losses)
 
             # For Tensorboard
             with tf.name_scope("summaries"):
                 tf.summary.scalar("loss", self.loss)
-                tf.summary.scalar("avg_epoch_reward", self.avg_reward_)
+                tf.summary.scalar("avg_max_Q", self.avg_max_Q)
                 self.summary_op = tf.summary.merge_all()
             
     def predict(self, sess, state):
