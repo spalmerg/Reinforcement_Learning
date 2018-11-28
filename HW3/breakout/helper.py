@@ -83,7 +83,7 @@ class Network():
         return loss
 
 
-def epsilon_greedy(sess, network, state):
+def epsilon_greedy(sess, network, state, epsilon):
     pick = np.random.rand() # Uniform random number generator
     if pick < epsilon: # If off policy -- random action
         action = np.random.randint(0,4)
