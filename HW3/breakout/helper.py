@@ -49,11 +49,11 @@ class Network():
             self.chosen_action_pred = tf.reduce_sum(self.predictions * self.action_one_hot, reduction_indices=-1)
 
             # Calculate Loss
-            self.losses = tf.losses.huber_loss(labels = self.target_preds_, predictions = self.chosen_action_pred)
-            self.loss = tf.reduce_mean(self.losses)
+            delta = self.target_preds_ - self.chosen_action_pred
+            self.loss = tf.reduce_mean(clipped_error(delta))
             
             # Adjust Network
-            self.learn = tf.train.AdamOptimizer(learning_rate).minimize(self.losses)
+            self.learn = tf.train.AdamOptimizer(learning_rate).minimize(self.loss)
 
             # For Tensorboard
             with tf.name_scope("summaries"):
@@ -110,3 +110,9 @@ def copy_parameters(sess, q_network, target_network):
         updates.append(update)
     
     sess.run(updates)
+
+def clipped_error(x):
+    try:
+        return tf.select(tf.abs(x) < 1.0, 0.5 * tf.square(x), tf.abs(x) - 0.5)
+    except:
+        return tf.where(tf.abs(x) < 1.0, 0.5 * tf.square(x), tf.abs(x) - 0.5)
