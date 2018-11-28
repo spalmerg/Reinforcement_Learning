@@ -38,7 +38,7 @@ def main(args):
         os.mkdir(os.path.join(args.log_dir, args.run_num))
 
     # set up and reset game environment
-    env = gym.make('Breakout-v0')
+    env = gym.make('BreakoutDeterministic-v4')
     env.reset()
 
     # reset and initialize networks (Q & Target)
