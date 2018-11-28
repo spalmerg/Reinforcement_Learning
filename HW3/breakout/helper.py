@@ -1,15 +1,11 @@
 import numpy as np
 import tensorflow as tf 
 
-def preprocess(image):
-    """ prepro 210x160x3 uint8 frame into 6400 (80x80) 2D float array """
-    image = image[35:195] # crop
-    image = image[::2,::2,0] # downsample by factor of 2
-    image[image == 144] = 0 # erase background (background type 1)
-    image[image == 109] = 0 # erase background (background type 2)
-    image[image != 0] = 1 # everything else just set to 1
-    return np.reshape(image.astype(np.float).ravel(), [80,80])
 
+def preprocess(img):
+    img = img[::2, ::2]
+    img = np.mean(img, axis=2).astype(np.uint8)
+    return img
 
 class Network():
     def __init__(self, learning_rate=0.01, hidden_size=10, action_size = 4, history_size=4, name="QEstimator"):
@@ -18,12 +14,15 @@ class Network():
             self.scope = name
 
             # Store Variables
-            self.inputs_ = tf.placeholder(tf.float32, [None, 80, 80, history_size], name='inputs')
+            self.inputs_ = tf.placeholder(tf.float32, [None, 105, 80, history_size], name='inputs')
             self.target_preds_ = tf.placeholder(tf.float32, [None,], name="expected_future_rewards")
             self.chosen_action_pred = tf.placeholder(tf.float32, [None,], name="chosen_action_pred")
             self.actions_ = tf.placeholder(tf.int32, shape=[None], name='actions')
             self.avg_max_Q_ = tf.placeholder(tf.float32, name="avg_max_Q")
             self.reward_ = tf.placeholder(tf.float32, name="reward")
+
+            # Normalizing the input
+            self.inputscaled = self.inputs_/255.0
             
             # Three Convolutional Layers
             init = tf.variance_scaling_initializer(scale=2)
@@ -33,12 +32,9 @@ class Network():
             self.conv2 = tf.contrib.layers.conv2d(self.conv1, 32, 4, 2, activation_fn=tf.nn.relu,
                                                     padding='VALID',
                                                     weights_initializer=init)
-            self.conv3 = tf.contrib.layers.conv2d(self.conv2, 64, 3, 1, activation_fn=tf.nn.relu,
-                                                    padding='VALID',  
-                                                    weights_initializer=init)
 
             # Fully Connected Layers
-            self.flatten = tf.contrib.layers.flatten(self.conv3)
+            self.flatten = tf.contrib.layers.flatten(self.conv2)
             self.fc1 = tf.contrib.layers.fully_connected(self.flatten, hidden_size, 
                                                                  weights_initializer=init)
             self.predictions = tf.contrib.layers.fully_connected(self.fc1, action_size,

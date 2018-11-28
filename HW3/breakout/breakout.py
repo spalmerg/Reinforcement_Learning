@@ -18,9 +18,9 @@ parser.add_argument('--learning_rate', default=0.000025, help='Learning rate for
 parser.add_argument('--discount_rate', default=0.95, help='Discount rate for future rewards')
 parser.add_argument('--epochs', default=10000, help='Number of epochs to train')
 parser.add_argument('--action_size', default=4, help='Number of actions in the game')
-parser.add_argument('--hidden_size', default=512, help='Number of hidden neurons in FC layers')
-parser.add_argument('--buffer_size', default=100000, help='Number of steps stored in the buffer')
-parser.add_argument('--batch_size', default=50, help='Number of steps sampled from buffer')
+parser.add_argument('--hidden_size', default=256, help='Number of hidden neurons in FC layers')
+parser.add_argument('--buffer_size', default=100, help='Number of steps stored in the buffer')
+parser.add_argument('--batch_size', default=10, help='Number of steps sampled from buffer')
 parser.add_argument('--history_size', default=4, help='Number of steps sampled from buffer')
 parser.add_argument('--reset_every', default=100, help='Number of steps before reset target network')
 parser.add_argument('--epsilon_explore', default=3000, help='Number of epochs to explore')
@@ -56,7 +56,7 @@ def main(args):
 
     # initialize buffer & history
     buffer = deque(maxlen=args.buffer_size)
-    history = np.zeros((80, 80, args.history_size + 1), dtype=np.uint8)
+    history = np.zeros((105, 80, args.history_size + 1), dtype=np.uint8)
 
     # Train the DQN
     with tf.Session() as sess: 
