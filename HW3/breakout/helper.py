@@ -26,7 +26,7 @@ class Network():
             
             # Three Convolutional Layers
             init = tf.variance_scaling_initializer(scale=2)
-            self.conv1 = tf.contrib.layers.conv2d(self.inputs_, 16, 8, 4, activation_fn=tf.nn.relu, 
+            self.conv1 = tf.contrib.layers.conv2d(self.inputscaled, 16, 8, 4, activation_fn=tf.nn.relu, 
                                                     padding='VALID',
                                                     weights_initializer=init)
             self.conv2 = tf.contrib.layers.conv2d(self.conv1, 32, 4, 2, activation_fn=tf.nn.relu,
