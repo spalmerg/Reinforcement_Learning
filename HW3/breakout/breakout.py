@@ -98,9 +98,6 @@ def main(args):
                 for i in range(args.history_size + 1):
                     history[:, :, i] = preprocess(state)
                 break
-        
-        # Initialize result for reporting
-        result = []
 
         # Train
         for epoch in range(args.epochs):
@@ -119,8 +116,8 @@ def main(args):
                 new_state, reward, done, _ = env.step(action)
 
                 # deal with history and state
-                history[:,:, 4] = preprocess(new_state) # add new state at end
-                history[:,:,:4] = history[:,:,1:] # shift history
+                history[:,:, args.history_size] = preprocess(new_state) # add new state at end
+                history[:,:,:args.history_size] = history[:,:,1:] # shift history
                 new_state = np.copy(history[:,:,1:]) # with new state
                 old_state = np.copy(history[:,:,:args.history_size]) # without new state
 
