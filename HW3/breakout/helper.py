@@ -23,6 +23,7 @@ class Network():
             self.chosen_action_pred = tf.placeholder(tf.float32, [None,], name="chosen_action_pred")
             self.actions_ = tf.placeholder(tf.int32, shape=[None], name='actions')
             self.avg_max_Q_ = tf.placeholder(tf.float32, name="avg_max_Q")
+            self.reward_ = tf.placeholder(tf.float32, name="reward")
             
             # Three Convolutional Layers
             init = tf.variance_scaling_initializer(scale=2)
@@ -59,18 +60,27 @@ class Network():
             with tf.name_scope("summaries"):
                 tf.summary.scalar("loss", self.loss)
                 tf.summary.scalar("avg_max_Q", self.avg_max_Q_)
+                tf.summary.scalar("reward", self.reward_)
                 self.summary_op = tf.summary.merge_all()
             
     def predict(self, sess, state):
         result = sess.run(self.predictions, feed_dict={self.inputs_: state})
         return result
     
-    def update(self, sess, state, action, target_preds, avg_max_Q):
+    def update(self, sess, state, action, target_preds):
+        feed_dict = {self.inputs_: state, 
+                    self.actions_: action, 
+                    self.target_preds_: target_preds}
+        loss = sess.run([self.loss, self.learn], feed_dict=feed_dict)
+        return loss
+
+    def display(self, sess, state, action, target_preds, avg_max_Q, reward):
         feed_dict = {self.inputs_: state, 
                     self.actions_: action, 
                     self.target_preds_: target_preds,
-                    self.avg_max_Q_: avg_max_Q}
-        loss = sess.run([self.loss, self.learn, self.summary_op], feed_dict=feed_dict)
+                    self.avg_max_Q_: avg_max_Q, 
+                    self.reward_: reward}
+        loss = sess.run([self.loss, self.summary_op], feed_dict=feed_dict)
         return loss
 
 

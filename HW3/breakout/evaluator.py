@@ -14,10 +14,9 @@ os.environ["CUDA_VISIBLE_DEVICES"]="0"
 # Arguments
 parser = argparse.ArgumentParser(description='DQN for Breakout Game')
 parser.add_argument('--hidden_size', default=512, help='Number of hidden neurons in FC layers')
-parser.add_argument('--learning_rate', default=0.00002, help='Learning rate for optimizer')
+parser.add_argument('--learning_rate', default=0.000025, help='Learning rate for optimizer')
 parser.add_argument('--action_size', default=4, help='Number of actions in the game')
 parser.add_argument('--games', default=1000, help="Number of games to play")
-parser.add_argument('--memory_size', default=4, help='Number of memory frames stored per state')
 
 
 def main(args): 
@@ -43,27 +42,21 @@ def main(args):
         print("MODEL RESTORED")
         for game in range(args.games):
             # start game & initialize memory
-            start_state = preprocess(env.reset())
-            for fill in range(args.memory_size):
-                state_memory.append(start_state)
+            state = preprocess(env.reset())
 
             reward_total = 0
             while True: 
-                state_formatted = np.stack(list(state_memory), axis=2)
-                action = np.argmax(QNetwork.predict(sess, [state_formatted]))
+                action = np.argmax(QNetwork.predict(sess, [state]))
                 new_state, reward, done, _ = env.step(action)
-
-                # Save old_state_memory
-                old_state_memory = state_memory
-
-                # Add new_state to state_memory
-                state_memory.append(preprocess(new_state))
-
-                # Update reward total
-                reward_total = reward_total + reward
 
                 if done:
                     break
+                else: 
+                    # Update reward total
+                    reward_total = reward_total + reward
+                    # Update state
+                    state = preprocess(new_state)
+
 
             print(reward_total)  
 

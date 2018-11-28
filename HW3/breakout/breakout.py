@@ -14,15 +14,14 @@ os.environ["CUDA_VISIBLE_DEVICES"]="0"
 
 parser = argparse.ArgumentParser(description='DQN for Breakout Game')
 
-parser.add_argument('--learning_rate', default=0.000025, help='Learning rate for optimizer')
+parser.add_argument('--learning_rate', default=0.00002, help='Learning rate for optimizer')
 parser.add_argument('--discount_rate', default=0.95, help='Discount rate for future rewards')
 parser.add_argument('--epochs', default=10000, help='Number of epochs to train')
 parser.add_argument('--action_size', default=4, help='Number of actions in the game')
 parser.add_argument('--hidden_size', default=512, help='Number of hidden neurons in FC layers')
 parser.add_argument('--buffer_size', default=100000, help='Number of steps stored in the buffer')
-parser.add_argument('--batch_size', default=500, help='Number of steps sampled from buffer')
+parser.add_argument('--batch_size', default=1000, help='Number of steps sampled from buffer')
 parser.add_argument('--reset_every', default=100, help='Number of steps before reset target network')
-parser.add_argument('--update_every', default=4, help='Number of episodes to play before updating network')
 parser.add_argument('--epsilon_explore', default=2000, help='Number of epochs to explore')
 parser.add_argument('--epsilon_start', default=0.1, help='Start epsilon for epsilon greedy')
 parser.add_argument('--epsilon_end', default=0.9, help='End epsilon for epsilon greedy')
@@ -74,7 +73,7 @@ def main(args):
         state = preprocess(env.reset())
 
         # Fill The Buffer
-        for i in range(args.buffer_size):
+        for i in range(args.buffer_size//2):
             action = epsilon_greedy(sess, QNetwork, state)
             new_state, reward, done, _ = env.step(action)
             
@@ -94,6 +93,7 @@ def main(args):
         # Train
         for epoch in range(args.epochs):
             result = []
+            reward_total = 0
             
             # Set Up Memory
             state = preprocess(env.reset())
@@ -107,45 +107,49 @@ def main(args):
                 new_state = preprocess(new_state)
                 buffer.append([state, action, new_state, reward, done])
                 
+                ### Sample & Update
+                sample = random.sample(buffer, args.batch_size)
+                state_b, action_b, new_state_b, reward_b, done_b = map(np.array, zip(*sample))
+
+                # Find max Q-Value per batch for progress
+                Q_preds = sess.run(QNetwork.chosen_action_pred, 
+                                    feed_dict={QNetwork.inputs_: state_b,
+                                    QNetwork.actions_: action_b})
+                result.append(np.max(Q_preds))
+
+                # Q-Network
+                T_preds = []
+                TPreds_batch = target.predict(sess, new_state_b)
+                for i in range(args.batch_size):
+                    terminal = done_b[i]
+                    if terminal:
+                        T_preds.append(reward_b[i])
+                    else:
+                        T_preds.append(reward_b[i] + args.discount_rate * np.max(TPreds_batch[i]))
+
+                # Update Q-Network
+                loss, _ = QNetwork.update(sess, state_b, action_b, T_preds)
+
                 # If simulation done, stop
                 if done:
+                    # Tensorboard
+                    avg_max_Q = np.mean(result)
+                    loss, summary = QNetwork.display(sess, state_b, action_b, T_preds, avg_max_Q, reward_total)
+                    # Log and save models
+                    logger.info("Epoch: {0}\tAvg Reward: {1}".format(epoch, avg_max_Q))
+                    writer.add_summary(summary, epoch)
+                    # Start Over
                     break
                 else: 
+                    reward_total = reward_total + reward
                     state = new_state
-                
-                ### Sample & Update
-                if count % args.update_every == 0:
-                    sample = random.sample(buffer, args.batch_size)
-                    state_b, action_b, new_state_b, reward_b, done_b = map(np.array, zip(*sample))
-
-                    # Find max Q-Value per batch for progress
-                    Q_preds = sess.run(QNetwork.chosen_action_pred, 
-                                        feed_dict={QNetwork.inputs_: state_b,
-                                        QNetwork.actions_: action_b})
-                    result.append(np.max(Q_preds))
-
-                    # Q-Network
-                    T_preds = []
-                    TPreds_batch = target.predict(sess, new_state_b)
-                    for i in range(args.batch_size):
-                        terminal = done_b[i]
-                        if terminal:
-                            T_preds.append(reward_b[i])
-                        else:
-                            T_preds.append(reward_b[i] + args.discount_rate * np.max(TPreds_batch[i]))
-
-                    # Update Q-Network
-                    avg_max_Q = np.mean(result)
-                    loss, _, summary = QNetwork.update(sess, state_b, action_b, T_preds, avg_max_Q)
                 
                 # Save target network parameters every epoch
                 count += 1
                 if count % args.reset_every == 0:
                     copy_parameters(sess, QNetwork, target)
 
-            # Log and save models
-            logger.info("Epoch: {0}\tAvg Reward: {1}".format(epoch, np.mean(result)))
-            writer.add_summary(summary, epoch)
+            # save model
             if epoch % 20 == 0:
                     saver.save(sess, "./model/model{0}.ckpt".format(epoch))
 
