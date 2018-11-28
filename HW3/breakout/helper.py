@@ -8,7 +8,7 @@ def preprocess(image):
     image[image == 144] = 0 # erase background (background type 1)
     image[image == 109] = 0 # erase background (background type 2)
     image[image != 0] = 1 # everything else just set to 1
-    return np.reshape(image.astype(np.float).ravel(), [80,80])
+    return np.reshape(image.astype(np.float).ravel(), [80,80,1])
 
 
 class Network():
@@ -18,7 +18,7 @@ class Network():
             self.scope = name
 
             # Store Variables
-            self.inputs_ = tf.placeholder(tf.float32, [None, 80, 80, memory_size], name='inputs')
+            self.inputs_ = tf.placeholder(tf.float32, [None, 80, 80, 1], name='inputs')
             self.target_preds_ = tf.placeholder(tf.float32, [None,], name="expected_future_rewards")
             self.chosen_action_pred = tf.placeholder(tf.float32, [None,], name="chosen_action_pred")
             self.actions_ = tf.placeholder(tf.int32, shape=[None], name='actions')
@@ -45,11 +45,10 @@ class Network():
                                                                  activation_fn=None)
             
             # Get Prediction for the chosen action (epsilon greedy)
-            self.action_one_hot = tf.one_hot(self.actions_, action_size, 1.0, 0.0, name='action_one_hot')
-            self.chosen_action_pred = tf.reduce_sum(self.predictions * self.action_one_hot, reduction_indices=-1)
+            self.indices = tf.range(1) * tf.size(self.actions_) + self.actions_
+            self.chosen_action_pred = tf.gather(tf.reshape(self.predictions, [-1]), self.indices)
     
             # Calculate Loss
-            # self.losses = tf.squared_difference(self.target_preds_, self.chosen_action_pred)
             self.losses = tf.losses.huber_loss(self.target_preds_, self.chosen_action_pred)
             self.loss = tf.reduce_mean(self.losses)
             
@@ -76,7 +75,6 @@ class Network():
 
 
 def epsilon_greedy(sess, network, state, epsilon=0.99):
-    state = np.stack(list(state), axis=2)
     pick = np.random.rand() # Uniform random number generator
     if pick > epsilon: # If off policy -- random action
         action = np.random.randint(0,4)
