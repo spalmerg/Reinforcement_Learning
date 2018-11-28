@@ -83,21 +83,17 @@ class Network():
         return loss
 
 
-def epsilon_greedy(sess, network, state, epsilon=0.9):
+def epsilon_greedy(sess, network, state):
     pick = np.random.rand() # Uniform random number generator
-    if pick > epsilon: # If off policy -- random action
+    if pick < epsilon: # If off policy -- random action
         action = np.random.randint(0,4)
     else: # If on policy
         action = np.argmax(network.predict(sess, [state]))
     return action
 
-
-# def copy_parameters(sess, q_network, target_network):
-
-#     q_vars = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope=q_network.scope)
-#     t_vars = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope=target_network.scope)
-
-#     sess.run([v_t.assign(v) for v_t, v in zip(t_vars, q_vars)])
+def explore_prob(count, explore_start = 1, explore_stop = 0.1, decay_rate = 0.0001):
+    explore_probability = explore_stop + (explore_start - explore_stop) * np.exp(-decay_rate * count)
+    return(explore_probability)
 
 def copy_parameters(sess, q_network, target_network):
     

@@ -8,7 +8,7 @@ import os
 import sys
 from collections import deque
 import random
-from helper import preprocess, Network, epsilon_greedy, copy_parameters
+from helper import preprocess, Network, epsilon_greedy, copy_parameters, explore_prob
 
 os.environ["CUDA_VISIBLE_DEVICES"]="0"
 
@@ -24,9 +24,6 @@ parser.add_argument('--batch_size', default=32, help='Number of steps sampled fr
 parser.add_argument('--history_size', default=4, help='Number of steps sampled from buffer')
 parser.add_argument('--reset_every', default=100, help='Number of steps before reset target network')
 parser.add_argument('--update_every', default=4, help='Number of steps before reset target network')
-parser.add_argument('--epsilon_explore', default=3000, help='Number of epochs to explore')
-parser.add_argument('--epsilon_start', default=0.1, help='Start epsilon for epsilon greedy')
-parser.add_argument('--epsilon_end', default=0.9, help='End epsilon for epsilon greedy')
 parser.add_argument('--log_dir', default='logs/breakout/', help='Path to logs for tensorboard visualization')
 parser.add_argument('--run_num', required=True, help='Provide a run number to correctly log')
 
@@ -69,11 +66,7 @@ def main(args):
         
         # Set up count for network reset
         count = 0
-        
-        # Make epsilon greedy schedule
-        epsilons = np.linspace(args.epsilon_start, args.epsilon_end, args.epsilon_explore)
-        epsilons = list(epsilons) + list(np.repeat(args.epsilon_end, args.epochs - len(epsilons)))
-        
+
         # Set up history for episode
         state = env.reset()
         for i in range(5):
@@ -81,7 +74,7 @@ def main(args):
 
         # Fill The Buffer
         for i in range(args.buffer_size//20):
-            action = epsilon_greedy(sess, QNetwork, history[:,:,:args.history_size], epsilons[0])
+            action = epsilon_greedy(sess, QNetwork, history[:,:,:args.history_size], explore_prob(count))
             new_state, reward, done, _ = env.step(action)
             
             # history updates
@@ -113,7 +106,7 @@ def main(args):
 
             while True: 
                 # Add M to buffer (following policy)
-                action = epsilon_greedy(sess, QNetwork, history[:,:,:args.history_size], epsilons[epoch])
+                action = epsilon_greedy(sess, QNetwork, history[:,:,:args.history_size], explore_prob(count))
                 new_state, reward, done, _ = env.step(action)
 
                 # deal with history and state
