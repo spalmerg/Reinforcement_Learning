@@ -91,7 +91,7 @@ def epsilon_greedy(sess, network, state, epsilon):
         action = np.argmax(network.predict(sess, [state]))
     return action
 
-def explore_prob(count, explore_start = 1, explore_stop = 0.1, decay_rate = 0.0001):
+def explore_prob(count, explore_start = 1, explore_stop = 0.1, decay_rate = 0.000001):
     explore_probability = explore_stop + (explore_start - explore_stop) * np.exp(-decay_rate * count)
     return(explore_probability)
 
