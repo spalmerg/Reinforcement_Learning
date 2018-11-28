@@ -14,15 +14,16 @@ os.environ["CUDA_VISIBLE_DEVICES"]="0"
 
 parser = argparse.ArgumentParser(description='DQN for Breakout Game')
 
-parser.add_argument('--learning_rate', default=0.00002, help='Learning rate for optimizer')
+parser.add_argument('--learning_rate', default=0.000025, help='Learning rate for optimizer')
 parser.add_argument('--discount_rate', default=0.95, help='Discount rate for future rewards')
 parser.add_argument('--epochs', default=10000, help='Number of epochs to train')
 parser.add_argument('--action_size', default=4, help='Number of actions in the game')
 parser.add_argument('--hidden_size', default=512, help='Number of hidden neurons in FC layers')
 parser.add_argument('--buffer_size', default=100000, help='Number of steps stored in the buffer')
-parser.add_argument('--batch_size', default=1000, help='Number of steps sampled from buffer')
+parser.add_argument('--batch_size', default=50, help='Number of steps sampled from buffer')
+parser.add_argument('--history_size', default=4, help='Number of steps sampled from buffer')
 parser.add_argument('--reset_every', default=100, help='Number of steps before reset target network')
-parser.add_argument('--epsilon_explore', default=2000, help='Number of epochs to explore')
+parser.add_argument('--epsilon_explore', default=3000, help='Number of epochs to explore')
 parser.add_argument('--epsilon_start', default=0.1, help='Start epsilon for epsilon greedy')
 parser.add_argument('--epsilon_end', default=0.9, help='End epsilon for epsilon greedy')
 parser.add_argument('--log_dir', default='logs/breakout/', help='Path to logs for tensorboard visualization')
@@ -43,16 +44,19 @@ def main(args):
     tf.reset_default_graph()
     QNetwork = Network(name='QNetwork', hidden_size=args.hidden_size,
                                         learning_rate=args.learning_rate, 
-                                        action_size=args.action_size)
+                                        action_size=args.action_size,
+                                        history_size=args.history_size)
     target = Network(name='Target', hidden_size=args.hidden_size,
                                         learning_rate=args.learning_rate, 
-                                        action_size=args.action_size)
+                                        action_size=args.action_size, 
+                                        history_size=args.history_size)
 
     # model saver
     saver = tf.train.Saver()
 
-    # initialize buffer, state memory, and result
+    # initialize buffer & history
     buffer = deque(maxlen=args.buffer_size)
+    history = np.zeros((80, 80, args.history_size + 1), dtype=np.uint8)
 
     # Train the DQN
     with tf.Session() as sess: 
@@ -69,43 +73,59 @@ def main(args):
         epsilons = np.linspace(args.epsilon_start, args.epsilon_end, args.epsilon_explore)
         epsilons = list(epsilons) + list(np.repeat(args.epsilon_end, args.epochs - len(epsilons)))
         
-        # Set up memory for episode
-        state = preprocess(env.reset())
+        # Set up history for episode
+        state = env.reset()
+        for i in range(5):
+            history[:, :, i] = preprocess(state)
 
         # Fill The Buffer
         for i in range(args.buffer_size//2):
-            action = epsilon_greedy(sess, QNetwork, state)
+            action = epsilon_greedy(sess, QNetwork, history[:,:,:args.history_size], epsilons[0])
             new_state, reward, done, _ = env.step(action)
             
-            # Add step to buffer
-            new_state = preprocess(new_state)
-            buffer.append([state, action, new_state, reward, done])
+            # history updates
+            history[:,:, args.history_size] = preprocess(new_state) # add new state at end
+            history[:,:,:args.history_size] = history[:,:,1:] # shift history
+            new_state = np.copy(history[:,:,1:]) # with new state
+            old_state = np.copy(history[:,:,:args.history_size]) # without new state
             
-            # If done, reset memory
+            # Add step to buffer
+            buffer.append([old_state, action, new_state, reward, done])
+            
+            # If done, reset history
             if done: 
-                state = preprocess(env.reset())
-            else: 
-                state = new_state
+                state = env.reset()
+                for i in range(args.history_size + 1):
+                    history[:, :, i] = preprocess(state)
+                break
         
         # Initialize result for reporting
         result = []
 
         # Train
         for epoch in range(args.epochs):
-            result = []
+            # For Tensorboard
+            result = [] 
             reward_total = 0
             
             # Set Up Memory
-            state = preprocess(env.reset())
+            state = env.reset() # get first state
+            for i in range(args.history_size + 1):
+                history[:, :, i] = preprocess(state)
 
             while True: 
                 # Add M to buffer (following policy)
-                action = epsilon_greedy(sess, QNetwork, state, epsilons[epoch])
+                action = epsilon_greedy(sess, QNetwork, history[:,:,:args.history_size], epsilons[epoch])
                 new_state, reward, done, _ = env.step(action)
 
+                # deal with history and state
+                history[:,:, 4] = preprocess(new_state) # add new state at end
+                history[:,:,:4] = history[:,:,1:] # shift history
+                new_state = np.copy(history[:,:,1:]) # with new state
+                old_state = np.copy(history[:,:,:args.history_size]) # without new state
+
                 # Add step to buffer
-                new_state = preprocess(new_state)
-                buffer.append([state, action, new_state, reward, done])
+                buffer.append([old_state, action, new_state, reward, done])
                 
                 ### Sample & Update
                 sample = random.sample(buffer, args.batch_size)
@@ -132,17 +152,19 @@ def main(args):
 
                 # If simulation done, stop
                 if done:
+                    # Reset history
+                    state = env.reset()
+                    for i in range(args.history_size + 1):
+                        history[:, :, i] = preprocess(state)
                     # Tensorboard
                     avg_max_Q = np.mean(result)
                     loss, summary = QNetwork.display(sess, state_b, action_b, T_preds, avg_max_Q, reward_total)
                     # Log and save models
                     logger.info("Epoch: {0}\tAvg Reward: {1}".format(epoch, avg_max_Q))
                     writer.add_summary(summary, epoch)
-                    # Start Over
                     break
                 else: 
                     reward_total = reward_total + reward
-                    state = new_state
                 
                 # Save target network parameters every epoch
                 count += 1

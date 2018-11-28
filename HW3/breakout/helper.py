@@ -8,17 +8,17 @@ def preprocess(image):
     image[image == 144] = 0 # erase background (background type 1)
     image[image == 109] = 0 # erase background (background type 2)
     image[image != 0] = 1 # everything else just set to 1
-    return np.reshape(image.astype(np.float).ravel(), [80,80,1])
+    return np.reshape(image.astype(np.float).ravel(), [80,80])
 
 
 class Network():
-    def __init__(self, learning_rate=0.01, hidden_size=10, action_size = 4, memory_size=4, name="QEstimator"):
+    def __init__(self, learning_rate=0.01, hidden_size=10, action_size = 4, history_size=4, name="QEstimator"):
         with tf.variable_scope(name):
             # Set scope for copying purposes
             self.scope = name
 
             # Store Variables
-            self.inputs_ = tf.placeholder(tf.float32, [None, 80, 80, 1], name='inputs')
+            self.inputs_ = tf.placeholder(tf.float32, [None, 80, 80, history_size], name='inputs')
             self.target_preds_ = tf.placeholder(tf.float32, [None,], name="expected_future_rewards")
             self.chosen_action_pred = tf.placeholder(tf.float32, [None,], name="chosen_action_pred")
             self.actions_ = tf.placeholder(tf.int32, shape=[None], name='actions')
@@ -84,7 +84,7 @@ class Network():
         return loss
 
 
-def epsilon_greedy(sess, network, state, epsilon=0.99):
+def epsilon_greedy(sess, network, state, epsilon=0.9):
     pick = np.random.rand() # Uniform random number generator
     if pick > epsilon: # If off policy -- random action
         action = np.random.randint(0,4)
