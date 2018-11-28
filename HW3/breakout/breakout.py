@@ -19,10 +19,11 @@ parser.add_argument('--discount_rate', default=0.95, help='Discount rate for fut
 parser.add_argument('--epochs', default=10000, help='Number of epochs to train')
 parser.add_argument('--action_size', default=4, help='Number of actions in the game')
 parser.add_argument('--hidden_size', default=256, help='Number of hidden neurons in FC layers')
-parser.add_argument('--buffer_size', default=100000, help='Number of steps stored in the buffer')
-parser.add_argument('--batch_size', default=100, help='Number of steps sampled from buffer')
+parser.add_argument('--buffer_size', default=1000000, help='Number of steps stored in the buffer')
+parser.add_argument('--batch_size', default=32, help='Number of steps sampled from buffer')
 parser.add_argument('--history_size', default=4, help='Number of steps sampled from buffer')
 parser.add_argument('--reset_every', default=100, help='Number of steps before reset target network')
+parser.add_argument('--update_every', default=4, help='Number of steps before reset target network')
 parser.add_argument('--epsilon_explore', default=3000, help='Number of epochs to explore')
 parser.add_argument('--epsilon_start', default=0.1, help='Start epsilon for epsilon greedy')
 parser.add_argument('--epsilon_end', default=0.9, help='End epsilon for epsilon greedy')
@@ -79,7 +80,7 @@ def main(args):
             history[:, :, i] = preprocess(state)
 
         # Fill The Buffer
-        for i in range(args.buffer_size//2):
+        for i in range(args.buffer_size//20):
             action = epsilon_greedy(sess, QNetwork, history[:,:,:args.history_size], epsilons[0])
             new_state, reward, done, _ = env.step(action)
             
@@ -123,29 +124,30 @@ def main(args):
 
                 # Add step to buffer
                 buffer.append([old_state, action, new_state, reward, done])
-                
-                ### Sample & Update
-                sample = random.sample(buffer, args.batch_size)
-                state_b, action_b, new_state_b, reward_b, done_b = map(np.array, zip(*sample))
 
-                # Find max Q-Value per batch for progress
-                Q_preds = sess.run(QNetwork.chosen_action_pred, 
-                                    feed_dict={QNetwork.inputs_: state_b,
-                                    QNetwork.actions_: action_b})
-                result.append(np.max(Q_preds))
+                if count % args.update_every == 0: 
+                    ### Sample & Update
+                    sample = random.sample(buffer, args.batch_size)
+                    state_b, action_b, new_state_b, reward_b, done_b = map(np.array, zip(*sample))
 
-                # Q-Network
-                T_preds = []
-                TPreds_batch = target.predict(sess, new_state_b)
-                for i in range(args.batch_size):
-                    terminal = done_b[i]
-                    if terminal:
-                        T_preds.append(reward_b[i])
-                    else:
-                        T_preds.append(reward_b[i] + args.discount_rate * np.max(TPreds_batch[i]))
+                    # Find max Q-Value per batch for progress
+                    Q_preds = sess.run(QNetwork.chosen_action_pred, 
+                                        feed_dict={QNetwork.inputs_: state_b,
+                                        QNetwork.actions_: action_b})
+                    result.append(np.max(Q_preds))
 
-                # Update Q-Network
-                loss, _ = QNetwork.update(sess, state_b, action_b, T_preds)
+                    # Q-Network
+                    T_preds = []
+                    TPreds_batch = target.predict(sess, new_state_b)
+                    for i in range(args.batch_size):
+                        terminal = done_b[i]
+                        if terminal:
+                            T_preds.append(reward_b[i])
+                        else:
+                            T_preds.append(reward_b[i] + args.discount_rate * np.max(TPreds_batch[i]))
+
+                    # Update Q-Network
+                    loss, _ = QNetwork.update(sess, state_b, action_b, T_preds)
 
                 # If simulation done, stop
                 if done:

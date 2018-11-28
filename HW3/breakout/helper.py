@@ -26,15 +26,18 @@ class Network():
             
             # Three Convolutional Layers
             init = tf.variance_scaling_initializer(scale=2)
-            self.conv1 = tf.contrib.layers.conv2d(self.inputscaled, 16, 8, 4, activation_fn=tf.nn.relu, 
+            self.conv1 = tf.contrib.layers.conv2d(self.inputscaled, 32, 8, 4, activation_fn=tf.nn.relu, 
                                                     padding='VALID',
                                                     weights_initializer=init)
-            self.conv2 = tf.contrib.layers.conv2d(self.conv1, 32, 4, 2, activation_fn=tf.nn.relu,
+            self.conv2 = tf.contrib.layers.conv2d(self.conv1, 64, 4, 2, activation_fn=tf.nn.relu,
+                                                    padding='VALID',
+                                                    weights_initializer=init)
+            self.conv3 = tf.contrib.layers.conv2d(self.conv1, 64, 3, 1, activation_fn=tf.nn.relu,
                                                     padding='VALID',
                                                     weights_initializer=init)
 
             # Fully Connected Layers
-            self.flatten = tf.contrib.layers.flatten(self.conv2)
+            self.flatten = tf.contrib.layers.flatten(self.conv3)
             self.fc1 = tf.contrib.layers.fully_connected(self.flatten, hidden_size, 
                                                                  weights_initializer=init)
             self.predictions = tf.contrib.layers.fully_connected(self.fc1, action_size,
