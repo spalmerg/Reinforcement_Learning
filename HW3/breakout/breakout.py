@@ -30,6 +30,7 @@ parser.add_argument('--epsilon_explore', default=1000000, help='Number of frames
 parser.add_argument('--epsilon_start', default=0.1, help='Start epsilon for epsilon greedy')
 parser.add_argument('--epsilon_end', default=0.9, help='End epsilon for epsilon greedy')
 
+
 def main(args):
 
     # create directory for logs
@@ -49,7 +50,7 @@ def main(args):
                                         history_size=args.history_size)
     target = Network(name='Target', hidden_size=args.hidden_size,
                                         learning_rate=args.learning_rate, 
-                                        action_size=args.action_size, 
+                                        action_size=args.action_size,
                                         history_size=args.history_size)
 
     # model saver
@@ -147,7 +148,7 @@ def main(args):
                             T_preds.append(reward_b[i] + args.discount_rate * np.max(TPreds_batch[i]))
 
                     # Update Q-Network
-                    loss, _ = QNetwork.update(sess, state_b, action_b, T_preds)
+                    loss, _ = QNetwork.update(sess, state_b, action_b, T_preds, count)
 
                 # If simulation done, stop
                 if done:

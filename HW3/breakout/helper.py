@@ -8,7 +8,15 @@ def preprocess(img):
     return img
 
 class Network():
-    def __init__(self, learning_rate=0.01, hidden_size=10, action_size = 4, history_size=4, name="QEstimator"):
+    def __init__(self, 
+                 learning_rate=0.00025,
+                 learning_rate_decay = 0.96, 
+                 learning_rate_decay_step = 50000000, 
+                 hidden_size=10, 
+                 action_size = 4, 
+                 history_size=4, 
+                 name="Network"):
+
         with tf.variable_scope(name):
             # Set scope for copying purposes
             self.scope = name
@@ -24,19 +32,10 @@ class Network():
             self.actions_ = tf.placeholder(tf.int32, shape=[None], name='actions')
             self.avg_max_Q_ = tf.placeholder(tf.float32, name="avg_max_Q")
             self.reward_ = tf.placeholder(tf.float32, name="reward")
+            self.learning_rate_step = tf.placeholder('int64', None, name='learning_rate_step')
 
             # Normalizing the input
             self.inputs_scaled_ = self.inputs_/255.0
-
-            # self.conv1 = tf.contrib.layers.conv2d(self.inputs_scaled_, 32, 8, 4, activation_fn=tf.nn.relu, 
-            #                                         padding='VALID',
-            #                                         weights_initializer=conv_init)
-            # self.conv2 = tf.contrib.layers.conv2d(self.conv1, 64, 4, 2, activation_fn=tf.nn.relu,
-            #                                         padding='VALID',
-            #                                         weights_initializer=conv_init)
-            # self.conv3 = tf.contrib.layers.conv2d(self.conv1, 64, 3, 1, activation_fn=tf.nn.relu,
-            #                                         padding='VALID',
-            #                                         weights_initializer=conv_init)
             
             # Three Convolutional Layers
             self.conv1 = tf.layers.conv2d(
@@ -84,7 +83,14 @@ class Network():
             self.loss = tf.reduce_mean(self.losses)
             
             # Adjust Network
-            self.learn = tf.train.AdamOptimizer(learning_rate).minimize(self.loss)
+            # self.learn = tf.train.AdamOptimizer(learning_rate).minimize(self.loss)
+            self.learning_rate_op = tf.maximum(learning_rate, tf.train.exponential_decay(
+                                                learning_rate,
+                                                self.learning_rate_step,
+                                                learning_rate_decay_step,
+                                                learning_rate_decay,
+                                                staircase=True))
+            self.learn = tf.train.RMSPropOptimizer(self.learning_rate_op, momentum=0.95, epsilon=0.01).minimize(self.loss)
 
             # For Tensorboard
             with tf.name_scope("summaries"):
@@ -97,10 +103,11 @@ class Network():
         result = sess.run(self.predictions, feed_dict={self.inputs_: state})
         return result
     
-    def update(self, sess, state, action, target_preds):
+    def update(self, sess, state, action, target_preds, global_step):
         feed_dict = {self.inputs_: state, 
                     self.actions_: action, 
-                    self.target_preds_: target_preds}
+                    self.target_preds_: target_preds, 
+                    self.learning_rate_step: global_step}
         loss = sess.run([self.loss, self.learn], feed_dict=feed_dict)
         return loss
 
