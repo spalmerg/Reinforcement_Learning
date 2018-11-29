@@ -1,12 +1,11 @@
 import numpy as np
 import tensorflow as tf 
-from skimage.color import rgb2gray
-from skimage.transform import resize
 
 
 def preprocess(img):
-    img = np.uint8(resize(rgb2gray(img), (84,84))*255)
-    return img
+        img = img[::2, ::2]
+	    img = np.mean(img, axis=2).astype(np.uint8)
+	    return img
 
 class Network():
     def __init__(self, learning_rate=0.01, hidden_size=10, action_size = 4, history_size=4, name="QEstimator"):
@@ -19,7 +18,7 @@ class Network():
             init = tf.contrib.layers.xavier_initializer()
 
             # Store Variables
-            self.inputs_ = tf.placeholder(tf.float32, [None, 84, 84, history_size], name='inputs')
+            self.inputs_ = tf.placeholder(tf.float32, [None, 105, 80, history_size], name='inputs')
             self.target_preds_ = tf.placeholder(tf.float32, [None,], name="expected_future_rewards")
             self.chosen_action_pred = tf.placeholder(tf.float32, [None,], name="chosen_action_pred")
             self.actions_ = tf.placeholder(tf.int32, shape=[None], name='actions')
@@ -58,7 +57,7 @@ class Network():
             # Fully Connected Layers
             self.flatten = tf.contrib.layers.flatten(self.conv3)
             self.fc1 = tf.layers.dense(self.flatten, 
-                                        512, 
+                                        hidden_size, 
                                         activation=tf.nn.relu,
                                         kernel_initializer=init)
             self.predictions = tf.layers.dense(self.fc1, 
@@ -73,6 +72,9 @@ class Network():
             # Calculate Loss
             self.losses = tf.losses.huber_loss(self.target_preds_, self.chosen_action_pred)
             self.loss = tf.reduce_mean(self.losses)
+
+            delta = self.target_preds_ - self.chosen_action_pred        
+            self.loss = tf.reduce_mean(clipped_error(delta))
             
             # Adjust Network
             self.learn = tf.train.AdamOptimizer(learning_rate).minimize(self.loss)
@@ -128,3 +130,9 @@ def copy_parameters(sess, q_network, target_network):
         updates.append(update)
     
     sess.run(updates)
+
+def clipped_error(x):
+    try:
+        return tf.select(tf.abs(x) < 1.0, 0.5 * tf.square(x), tf.abs(x) - 0.5)
+    except:
+        return tf.where(tf.abs(x) < 1.0, 0.5 * tf.square(x), tf.abs(x) - 0.5)

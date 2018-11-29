@@ -57,7 +57,7 @@ def main(args):
 
     # initialize buffer & history
     buffer = deque(maxlen=args.buffer_size)
-    history = np.zeros((84, 84, args.history_size + 1), dtype=np.uint8)
+    history = np.zeros((105, 80, args.history_size + 1), dtype=np.uint8)
 
     # exploit/explore schedule
     epsilons = np.linspace(args.epsilon_start, args.epsilon_end, args.epsilon_explore)
