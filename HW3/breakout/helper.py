@@ -1,10 +1,10 @@
 import numpy as np
 import tensorflow as tf 
+from skimage.color import rgb2gray
 
 
 def preprocess(img):
-    img = img[::2, ::2]
-    img = np.mean(img, axis=2).astype(np.uint8)
+    img = np.uint8(resize(rgb2gray(img), (84,84))*255)
     return img
 
 class Network():
@@ -14,7 +14,7 @@ class Network():
             self.scope = name
 
             # Store Variables
-            self.inputs_ = tf.placeholder(tf.float32, [None, 105, 80, history_size], name='inputs')
+            self.inputs_ = tf.placeholder(tf.float32, [None, 84, 84, history_size], name='inputs')
             self.target_preds_ = tf.placeholder(tf.float32, [None,], name="expected_future_rewards")
             self.chosen_action_pred = tf.placeholder(tf.float32, [None,], name="chosen_action_pred")
             self.actions_ = tf.placeholder(tf.int32, shape=[None], name='actions')

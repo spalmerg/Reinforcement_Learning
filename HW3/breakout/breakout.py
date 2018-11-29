@@ -15,12 +15,12 @@ os.environ["CUDA_VISIBLE_DEVICES"]="0"
 parser = argparse.ArgumentParser(description='DQN for Breakout Game')
 
 parser.add_argument('--learning_rate', default=0.000025, help='Learning rate for optimizer')
-parser.add_argument('--discount_rate', default=0.95, help='Discount rate for future rewards')
-parser.add_argument('--epochs', default=10000, help='Number of epochs to train')
+parser.add_argument('--discount_rate', default=0.99, help='Discount rate for future rewards')
+parser.add_argument('--epochs', default=100000, help='Number of epochs to train')
 parser.add_argument('--action_size', default=4, help='Number of actions in the game')
 parser.add_argument('--hidden_size', default=256, help='Number of hidden neurons in FC layers')
 parser.add_argument('--buffer_size', default=1000000, help='Number of steps stored in the buffer')
-parser.add_argument('--batch_size', default=32, help='Number of steps sampled from buffer')
+parser.add_argument('--batch_size', default=100, help='Number of steps sampled from buffer')
 parser.add_argument('--history_size', default=4, help='Number of steps sampled from buffer')
 parser.add_argument('--reset_every', default=10000, help='Number of steps before reset target network')
 parser.add_argument('--update_every', default=4, help='Number of steps before reset target network')
@@ -35,7 +35,7 @@ def main(args):
         os.mkdir(os.path.join(args.log_dir, args.run_num))
 
     # set up and reset game environment
-    env = gym.make('BreakoutDeterministic-v4')
+    env = gym.make('Breakout-v0')
     env.reset()
 
     # reset and initialize networks (Q & Target)
@@ -54,7 +54,7 @@ def main(args):
 
     # initialize buffer & history
     buffer = deque(maxlen=args.buffer_size)
-    history = np.zeros((105, 80, args.history_size + 1), dtype=np.uint8)
+    history = np.zeros((84, 84, args.history_size + 1), dtype=np.uint8)
 
     # Train the DQN
     with tf.Session() as sess: 
