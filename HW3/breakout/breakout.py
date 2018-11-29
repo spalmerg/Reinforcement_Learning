@@ -8,24 +8,27 @@ import os
 import sys
 from collections import deque
 import random
-from helper import preprocess, Network, epsilon_greedy, copy_parameters, explore_prob
+from helper import preprocess, Network, epsilon_greedy, copy_parameters
 
 os.environ["CUDA_VISIBLE_DEVICES"]="0"
 
 parser = argparse.ArgumentParser(description='DQN for Breakout Game')
 
 parser.add_argument('--learning_rate', default=0.000025, help='Learning rate for optimizer')
-parser.add_argument('--discount_rate', default=0.99, help='Discount rate for future rewards')
-parser.add_argument('--epochs', default=100000, help='Number of epochs to train')
+parser.add_argument('--discount_rate', default=0.95, help='Discount rate for future rewards')
+parser.add_argument('--epochs', default=1e10, help='Number of epochs to train')
 parser.add_argument('--action_size', default=4, help='Number of actions in the game')
 parser.add_argument('--hidden_size', default=512, help='Number of hidden neurons in FC layers')
-parser.add_argument('--buffer_size', default=1000000, help='Number of steps stored in the buffer')
-parser.add_argument('--batch_size', default=100, help='Number of steps sampled from buffer')
+parser.add_argument('--buffer_size', default=1e6, help='Number of steps stored in the buffer')
+parser.add_argument('--batch_size', default=64, help='Number of steps sampled from buffer')
 parser.add_argument('--history_size', default=4, help='Number of steps sampled from buffer')
-parser.add_argument('--reset_every', default=10000, help='Number of steps before reset target network')
+parser.add_argument('--reset_every', default=1e4, help='Number of steps before reset target network')
 parser.add_argument('--update_every', default=4, help='Number of steps before reset target network')
 parser.add_argument('--log_dir', default='logs/breakout/', help='Path to logs for tensorboard visualization')
 parser.add_argument('--run_num', required=True, help='Provide a run number to correctly log')
+parser.add_argument('--epsilon_explore', default=1e6, help='Number of frames to explore')
+parser.add_argument('--epsilon_start', default=0.1, help='Start epsilon for epsilon greedy')
+parser.add_argument('--epsilon_end', default=0.9, help='End epsilon for epsilon greedy')
 
 def main(args):
 
@@ -56,6 +59,10 @@ def main(args):
     buffer = deque(maxlen=args.buffer_size)
     history = np.zeros((84, 84, args.history_size + 1), dtype=np.uint8)
 
+    # exploit/explore schedule
+    epsilons = np.linspace(args.epsilon_start, args.epsilon_end, args.epsilon_explore)
+    epsilons = list(epsilons) + list(np.repeat(args.epsilon_end, 1e7))
+
     # Train the DQN
     with tf.Session() as sess: 
         writer = tf.summary.FileWriter(os.path.join(args.log_dir, args.run_num), sess.graph)
@@ -74,7 +81,7 @@ def main(args):
 
         # Fill The Buffer
         for i in range(args.buffer_size//20):
-            action = epsilon_greedy(sess, QNetwork, history[:,:,:args.history_size], explore_prob(count))
+            action = epsilon_greedy(sess, QNetwork, history[:,:,:args.history_size], epsilons[count])
             new_state, reward, done, _ = env.step(action)
             
             # history updates
@@ -106,7 +113,7 @@ def main(args):
 
             while True: 
                 # Add M to buffer (following policy)
-                action = epsilon_greedy(sess, QNetwork, history[:,:,:args.history_size], explore_prob(count))
+                action = epsilon_greedy(sess, QNetwork, history[:,:,:args.history_size], epsilons[count])
                 new_state, reward, done, _ = env.step(action)
 
                 # deal with history and state

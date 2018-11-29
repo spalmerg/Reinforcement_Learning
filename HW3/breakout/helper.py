@@ -29,29 +29,31 @@ class Network():
             init = tf.variance_scaling_initializer(scale=2)
             self.conv1 = tf.contrib.layers.conv2d(self.inputscaled, 32, 8, 4, activation_fn=tf.nn.relu, 
                                                     padding='VALID',
-                                                    weights_initializer=init)
+                                                    weights_initializer=init, 
+                                                    use_bias=False)
             self.conv2 = tf.contrib.layers.conv2d(self.conv1, 64, 4, 2, activation_fn=tf.nn.relu,
                                                     padding='VALID',
-                                                    weights_initializer=init)
+                                                    weights_initializer=init,
+                                                    use_bias=False)
             self.conv3 = tf.contrib.layers.conv2d(self.conv1, 64, 3, 1, activation_fn=tf.nn.relu,
                                                     padding='VALID',
-                                                    weights_initializer=init)
+                                                    weights_initializer=init,
+                                                    use_bias=False)
 
             # Fully Connected Layers
             self.flatten = tf.contrib.layers.flatten(self.conv3)
-            self.fc1 = tf.contrib.layers.fully_connected(self.flatten, hidden_size, 
-                                                                 weights_initializer=init)
-            self.predictions = tf.contrib.layers.fully_connected(self.fc1, action_size,
-                                                                 weights_initializer=init, 
-                                                                 activation_fn=None)
+            self.fc1 = tf.layers.dense(self.flatten, 512, activation=tf.nn.relu,
+                                        kernel_initializer=init)
+            self.fc2 = tf.layers.dense(self.fc1, action_size, activation=None
+                                        kernel_initializer=init)
             
             # Get Prediction for the chosen action (epsilon greedy)
             self.action_one_hot = tf.one_hot(self.actions_, action_size, 1.0, 0.0, name='action_one_hot')
             self.chosen_action_pred = tf.reduce_sum(self.predictions * self.action_one_hot, reduction_indices=-1)
 
             # Calculate Loss
-            delta = self.target_preds_ - self.chosen_action_pred
-            self.loss = tf.reduce_mean(clipped_error(delta))
+            self.losses = tf.losses.huber_loss(self.target_preds_, self.chosen_action_pred)
+            self.loss = tf.reduce_mean(self.losses)
             
             # Adjust Network
             self.learn = tf.train.AdamOptimizer(learning_rate).minimize(self.loss)
@@ -86,15 +88,11 @@ class Network():
 
 def epsilon_greedy(sess, network, state, epsilon):
     pick = np.random.rand() # Uniform random number generator
-    if pick < epsilon: # If off policy -- random action
+    if pick > epsilon: # If off policy -- random action
         action = np.random.randint(0,4)
     else: # If on policy
         action = np.argmax(network.predict(sess, [state]))
     return action
-
-def explore_prob(count, explore_start = 1, explore_stop = 0.1, decay_rate = 0.000001):
-    explore_probability = explore_stop + (explore_start - explore_stop) * np.exp(-decay_rate * count)
-    return(explore_probability)
 
 def copy_parameters(sess, q_network, target_network):
     
@@ -111,9 +109,3 @@ def copy_parameters(sess, q_network, target_network):
         updates.append(update)
     
     sess.run(updates)
-
-def clipped_error(x):
-    try:
-        return tf.select(tf.abs(x) < 1.0, 0.5 * tf.square(x), tf.abs(x) - 0.5)
-    except:
-        return tf.where(tf.abs(x) < 1.0, 0.5 * tf.square(x), tf.abs(x) - 0.5)
