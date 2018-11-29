@@ -68,7 +68,7 @@ class Network():
             
             # Get Prediction for the chosen action (epsilon greedy)
             self.action_one_hot = tf.one_hot(self.actions_, action_size, 1.0, 0.0, name='action_one_hot')
-            self.chosen_action_pred = tf.reduce_sum(tf.multiply(self.predictions, self.action_one_hot) axis=1)
+            self.chosen_action_pred = tf.reduce_sum(tf.multiply(self.predictions, self.action_one_hot), axis=1)
 
             # Calculate Loss
             self.losses = tf.losses.huber_loss(self.target_preds_, self.chosen_action_pred)
