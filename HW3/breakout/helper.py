@@ -44,7 +44,7 @@ class Network():
             self.flatten = tf.contrib.layers.flatten(self.conv3)
             self.fc1 = tf.layers.dense(self.flatten, 512, activation=tf.nn.relu,
                                         kernel_initializer=init)
-            self.fc2 = tf.layers.dense(self.fc1, action_size, activation=None
+            self.fc2 = tf.layers.dense(self.fc1, action_size, activation=None,
                                         kernel_initializer=init)
             
             # Get Prediction for the chosen action (epsilon greedy)
