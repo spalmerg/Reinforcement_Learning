@@ -28,7 +28,7 @@ class Network():
             # Normalizing the input
             self.inputs_scaled_ = self.inputs_/255.0
 
-            self.conv1 = tf.contrib.layers.conv2d(self.inputscaled, 32, 8, 4, activation_fn=tf.nn.relu, 
+            self.conv1 = tf.contrib.layers.conv2d(self.inputs_scaled_, 32, 8, 4, activation_fn=tf.nn.relu, 
                                                     padding='VALID',
                                                     weights_initializer=conv_init)
             self.conv2 = tf.contrib.layers.conv2d(self.conv1, 64, 4, 2, activation_fn=tf.nn.relu,
