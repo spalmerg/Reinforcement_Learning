@@ -34,7 +34,7 @@ class Network():
                 strides = [4,4],
                 padding = "VALID",
                 kernel_initializer=init,
-                activation=tf.nn.relu, use_bias=False)
+                activation=tf.nn.relu)
             self.conv2 = tf.layers.conv2d(
                 inputs = self.inputs_, 
                 filters = 64,
@@ -42,7 +42,7 @@ class Network():
                 strides = [2,2],
                 padding = "VALID",
                 kernel_initializer=init,
-                activation=tf.nn.relu, use_bias=False)
+                activation=tf.nn.relu)
             self.conv3 = tf.layers.conv2d(
                 inputs = self.inputs_, 
                 filters = 128,
@@ -50,7 +50,7 @@ class Network():
                 strides = [2,2],
                 padding = "VALID",
                 kernel_initializer=init,
-                activation=tf.nn.relu, use_bias=False)
+                activation=tf.nn.relu)
 
             # Fully Connected Layers
             self.flatten = tf.contrib.layers.flatten(self.conv3)
