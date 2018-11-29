@@ -28,41 +28,41 @@ class Network():
             # Normalizing the input
             self.inputs_scaled_ = self.inputs_/255.0
 
-            self.conv1 = tf.contrib.layers.conv2d(self.inputs_scaled_, 32, 8, 4, activation_fn=tf.nn.relu, 
-                                                    padding='VALID',
-                                                    weights_initializer=conv_init)
-            self.conv2 = tf.contrib.layers.conv2d(self.conv1, 64, 4, 2, activation_fn=tf.nn.relu,
-                                                    padding='VALID',
-                                                    weights_initializer=conv_init)
-            self.conv3 = tf.contrib.layers.conv2d(self.conv1, 64, 3, 1, activation_fn=tf.nn.relu,
-                                                    padding='VALID',
-                                                    weights_initializer=conv_init)
+            # self.conv1 = tf.contrib.layers.conv2d(self.inputs_scaled_, 32, 8, 4, activation_fn=tf.nn.relu, 
+            #                                         padding='VALID',
+            #                                         weights_initializer=conv_init)
+            # self.conv2 = tf.contrib.layers.conv2d(self.conv1, 64, 4, 2, activation_fn=tf.nn.relu,
+            #                                         padding='VALID',
+            #                                         weights_initializer=conv_init)
+            # self.conv3 = tf.contrib.layers.conv2d(self.conv1, 64, 3, 1, activation_fn=tf.nn.relu,
+            #                                         padding='VALID',
+            #                                         weights_initializer=conv_init)
             
-            # # Three Convolutional Layers
-            # self.conv1 = tf.layers.conv2d(
-            #     inputs = self.inputs_scaled_, 
-            #     filters = 32,
-            #     kernel_size = [8,8],
-            #     strides = [4,4],
-            #     padding = "VALID",
-            #     kernel_initializer=conv_init,
-            #     activation=tf.nn.relu)
-            # self.conv2 = tf.layers.conv2d(
-            #     inputs = self.inputs_, 
-            #     filters = 64,
-            #     kernel_size = [4,4],
-            #     strides = [2,2],
-            #     padding = "VALID",
-            #     kernel_initializer=conv_init,
-            #     activation=tf.nn.relu)
-            # self.conv3 = tf.layers.conv2d(
-            #     inputs = self.inputs_, 
-            #     filters = 128,
-            #     kernel_size = [4,4],
-            #     strides = [2,2],
-            #     padding = "VALID",
-            #     kernel_initializer=conv_init,
-            #     activation=tf.nn.relu)
+            # Three Convolutional Layers
+            self.conv1 = tf.layers.conv2d(
+                inputs = self.inputs_scaled_, 
+                filters = 32,
+                kernel_size = [8,8],
+                strides = [4,4],
+                padding = "VALID",
+                kernel_initializer=conv_init,
+                activation=tf.nn.relu)
+            self.conv2 = tf.layers.conv2d(
+                inputs = self.conv1, 
+                filters = 64,
+                kernel_size = [4,4],
+                strides = [2,2],
+                padding = "VALID",
+                kernel_initializer=conv_init,
+                activation=tf.nn.relu)
+            self.conv3 = tf.layers.conv2d(
+                inputs = self.conv2, 
+                filters = 128,
+                kernel_size = [4,4],
+                strides = [2,2],
+                padding = "VALID",
+                kernel_initializer=conv_init,
+                activation=tf.nn.relu)
 
             # Fully Connected Layers
             self.flatten = tf.contrib.layers.flatten(self.conv3)
