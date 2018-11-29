@@ -14,6 +14,10 @@ class Network():
             # Set scope for copying purposes
             self.scope = name
 
+            # Initializers
+            conv_init = tf.contrib.layers.xavier_initializer_conv2d()
+            init = tf.contrib.layers.xavier_initializer()
+
             # Store Variables
             self.inputs_ = tf.placeholder(tf.float32, [None, 84, 84, history_size], name='inputs')
             self.target_preds_ = tf.placeholder(tf.float32, [None,], name="expected_future_rewards")
@@ -26,14 +30,13 @@ class Network():
             self.inputs_scaled_ = self.inputs_/255.0
             
             # Three Convolutional Layers
-            init = tf.variance_scaling_initializer(scale=2)
             self.conv1 = tf.layers.conv2d(
                 inputs = self.inputs_scaled_, 
                 filters = 32,
                 kernel_size = [8,8],
                 strides = [4,4],
                 padding = "VALID",
-                kernel_initializer=init,
+                kernel_initializer=conv_init,
                 activation=tf.nn.relu)
             self.conv2 = tf.layers.conv2d(
                 inputs = self.inputs_, 
@@ -41,7 +44,7 @@ class Network():
                 kernel_size = [4,4],
                 strides = [2,2],
                 padding = "VALID",
-                kernel_initializer=init,
+                kernel_initializer=conv_init,
                 activation=tf.nn.relu)
             self.conv3 = tf.layers.conv2d(
                 inputs = self.inputs_, 
@@ -49,19 +52,23 @@ class Network():
                 kernel_size = [4,4],
                 strides = [2,2],
                 padding = "VALID",
-                kernel_initializer=init,
+                kernel_initializer=conv_init,
                 activation=tf.nn.relu)
 
             # Fully Connected Layers
             self.flatten = tf.contrib.layers.flatten(self.conv3)
-            self.fc1 = tf.layers.dense(self.flatten, 512, activation=tf.nn.relu,
+            self.fc1 = tf.layers.dense(self.flatten, 
+                                        512, 
+                                        activation=tf.nn.relu,
                                         kernel_initializer=init)
-            self.predictions = tf.layers.dense(self.fc1, action_size, activation=None,
+            self.predictions = tf.layers.dense(self.fc1, 
+                                        action_size, 
+                                        activation=None,
                                         kernel_initializer=init)
             
             # Get Prediction for the chosen action (epsilon greedy)
             self.action_one_hot = tf.one_hot(self.actions_, action_size, 1.0, 0.0, name='action_one_hot')
-            self.chosen_action_pred = tf.reduce_sum(self.predictions * self.action_one_hot, reduction_indices=-1)
+            self.chosen_action_pred = tf.reduce_sum(tf.multiply(self.predictions, self.action_one_hot) axis=1)
 
             # Calculate Loss
             self.losses = tf.losses.huber_loss(self.target_preds_, self.chosen_action_pred)
