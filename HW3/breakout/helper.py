@@ -1,6 +1,7 @@
 import numpy as np
 import tensorflow as tf 
 from skimage.color import rgb2gray
+from skimage.transform import resize
 
 
 def preprocess(img):
