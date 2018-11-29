@@ -4,8 +4,8 @@ import tensorflow as tf
 
 def preprocess(img):
     img = img[::2, ::2]
-	img = np.mean(img, axis=2).astype(np.uint8)
-	return img
+    img = np.mean(img, axis=2).astype(np.uint8)
+    return img
 
 class Network():
     def __init__(self, learning_rate=0.01, hidden_size=10, action_size = 4, history_size=4, name="QEstimator"):
