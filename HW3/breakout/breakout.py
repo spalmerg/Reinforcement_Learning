@@ -18,7 +18,7 @@ parser.add_argument('--learning_rate', default=0.000025, help='Learning rate for
 parser.add_argument('--discount_rate', default=0.99, help='Discount rate for future rewards')
 parser.add_argument('--epochs', default=100000, help='Number of epochs to train')
 parser.add_argument('--action_size', default=4, help='Number of actions in the game')
-parser.add_argument('--hidden_size', default=256, help='Number of hidden neurons in FC layers')
+parser.add_argument('--hidden_size', default=512, help='Number of hidden neurons in FC layers')
 parser.add_argument('--buffer_size', default=1000000, help='Number of steps stored in the buffer')
 parser.add_argument('--batch_size', default=100, help='Number of steps sampled from buffer')
 parser.add_argument('--history_size', default=4, help='Number of steps sampled from buffer')
