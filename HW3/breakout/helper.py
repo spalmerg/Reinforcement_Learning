@@ -23,28 +23,40 @@ class Network():
             self.reward_ = tf.placeholder(tf.float32, name="reward")
 
             # Normalizing the input
-            self.inputscaled = self.inputs_/255.0
+            self.inputs_scaled_ = self.inputs_/255.0
             
             # Three Convolutional Layers
             init = tf.variance_scaling_initializer(scale=2)
-            self.conv1 = tf.layers.conv2d(self.inputscaled, 32, 8, 4, activation_fn=tf.nn.relu, 
-                                                    padding='VALID',
-                                                    weights_initializer=init, 
-                                                    use_bias=False)
-            self.conv2 = tf.layers.conv2d(self.conv1, 64, 4, 2, activation_fn=tf.nn.relu,
-                                                    padding='VALID',
-                                                    weights_initializer=init,
-                                                    use_bias=False)
-            self.conv3 = tf.layers.conv2d(self.conv1, 64, 3, 1, activation_fn=tf.nn.relu,
-                                                    padding='VALID',
-                                                    weights_initializer=init,
-                                                    use_bias=False)
+            self.conv1 = tf.layers.conv2d(
+                inputs = self.inputs_scaled_, 
+                filters = 32,
+                kernel_size = [8,8],
+                strides = [4,4],
+                padding = "VALID",
+                kernel_initializer=init,
+                activation=tf.nn.relu, use_bias=False)
+            self.conv2 = tf.layers.conv2d(
+                inputs = self.inputs_, 
+                filters = 64,
+                kernel_size = [4,4],
+                strides = [2,2],
+                padding = "VALID",
+                kernel_initializer=init,
+                activation=tf.nn.relu, use_bias=False)
+            self.conv3 = tf.layers.conv2d(
+                inputs = self.inputs_, 
+                filters = 128,
+                kernel_size = [4,4],
+                strides = [2,2],
+                padding = "VALID",
+                kernel_initializer=init,
+                activation=tf.nn.relu, use_bias=False)
 
             # Fully Connected Layers
             self.flatten = tf.contrib.layers.flatten(self.conv3)
             self.fc1 = tf.layers.dense(self.flatten, 512, activation=tf.nn.relu,
                                         kernel_initializer=init)
-            self.fc2 = tf.layers.dense(self.fc1, action_size, activation=None,
+            self.predictions = tf.layers.dense(self.fc1, action_size, activation=None,
                                         kernel_initializer=init)
             
             # Get Prediction for the chosen action (epsilon greedy)
