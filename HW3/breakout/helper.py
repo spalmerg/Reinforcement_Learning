@@ -40,7 +40,7 @@ class Network():
             # Three Convolutional Layers
             self.conv1 = tf.layers.conv2d(
                 inputs = self.inputs_scaled_, 
-                filters = 32,
+                filters = 16,
                 kernel_size = [8,8],
                 strides = [4,4],
                 padding = "VALID",
@@ -48,23 +48,23 @@ class Network():
                 activation=tf.nn.relu)
             self.conv2 = tf.layers.conv2d(
                 inputs = self.conv1, 
-                filters = 64,
+                filters = 8,
                 kernel_size = [4,4],
                 strides = [2,2],
                 padding = "VALID",
                 kernel_initializer=conv_init,
                 activation=tf.nn.relu)
-            self.conv3 = tf.layers.conv2d(
-                inputs = self.conv2, 
-                filters = 128,
-                kernel_size = [4,4],
-                strides = [2,2],
-                padding = "VALID",
-                kernel_initializer=conv_init,
-                activation=tf.nn.relu)
+            # self.conv3 = tf.layers.conv2d(
+            #     inputs = self.conv2, 
+            #     filters = 128,
+            #     kernel_size = [4,4],
+            #     strides = [2,2],
+            #     padding = "VALID",
+            #     kernel_initializer=conv_init,
+            #     activation=tf.nn.relu)
 
             # Fully Connected Layers
-            self.flatten = tf.contrib.layers.flatten(self.conv3)
+            self.flatten = tf.contrib.layers.flatten(self.conv2)
             self.fc1 = tf.layers.dense(self.flatten, 
                                         hidden_size, 
                                         activation=tf.nn.relu,
