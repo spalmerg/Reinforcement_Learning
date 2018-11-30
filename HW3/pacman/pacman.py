@@ -14,7 +14,7 @@ os.environ["CUDA_VISIBLE_DEVICES"]="0"
 
 parser = argparse.ArgumentParser(description='DQN for Pacman Game')
 
-parser.add_argument('--learning_rate', default=0.000025, help='Learning rate for optimizer')
+parser.add_argument('--learning_rate', default=0.001, help='Learning rate for optimizer')
 parser.add_argument('--discount_rate', default=0.99, help='Discount rate for future rewards')
 parser.add_argument('--epochs', default=10000000000, help='Number of epochs to train')
 parser.add_argument('--action_size', default=4, help='Number of actions in the game')
