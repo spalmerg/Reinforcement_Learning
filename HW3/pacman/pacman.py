@@ -24,7 +24,7 @@ parser.add_argument('--batch_size', default=32, help='Number of steps sampled fr
 parser.add_argument('--history_size', default=4, help='Number of steps sampled from buffer')
 parser.add_argument('--reset_every', default=10000, help='Number of steps before reset target network')
 parser.add_argument('--update_every', default=4, help='Number of steps before reset target network')
-parser.add_argument('--log_dir', default='logs/breakout/', help='Path to logs for tensorboard visualization')
+parser.add_argument('--log_dir', default='logs/pacman/', help='Path to logs for tensorboard visualization')
 parser.add_argument('--run_num', required=True, help='Provide a run number to correctly log')
 parser.add_argument('--epsilon_explore', default=1000000, help='Number of frames to explore')
 parser.add_argument('--epsilon_start', default=0.1, help='Start epsilon for epsilon greedy')
