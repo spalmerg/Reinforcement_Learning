@@ -125,12 +125,13 @@ class Network():
 
 
 def epsilon_greedy(sess, network, state, epsilon):
+    Q_values = network.predict(sess, [state])
     pick = np.random.rand() # Uniform random number generator
     if pick > epsilon: # If off policy -- random action
         action = np.random.randint(0,4)
     else: # If on policy
-        action = np.argmax(network.predict(sess, [state]))
-    return action
+        action = np.argmax(Q_values)
+    return (action, max(Q_values))
 
 def copy_parameters(sess, q_network, target_network):
     
