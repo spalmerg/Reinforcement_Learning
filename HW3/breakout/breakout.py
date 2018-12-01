@@ -10,7 +10,7 @@ from collections import deque
 import random
 from helper import preprocess, Network, epsilon_greedy, copy_parameters
 
-os.environ["CUDA_VISIBLE_DEVICES"]="2"
+os.environ["CUDA_VISIBLE_DEVICES"]="0"
 
 parser = argparse.ArgumentParser(description='DQN for Breakout Game')
 
