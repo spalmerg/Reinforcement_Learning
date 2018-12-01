@@ -28,10 +28,12 @@ def main(args):
     # initialize networks
     QNetwork = Network(name='QNetwork', hidden_size=args.hidden_size,
                                         learning_rate=args.learning_rate, 
-                                        action_size=args.action_size)
+                                        action_size=env.action_space.n,
+                                        history_size=args.history_size)
     target = Network(name='Target', hidden_size=args.hidden_size,
                                         learning_rate=args.learning_rate, 
-                                        action_size=args.action_size)
+                                        action_size=env.action_space.n,
+                                        history_size=args.history_size)
 
     saver = tf.train.Saver()
 
