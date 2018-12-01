@@ -84,14 +84,13 @@ class Network():
             self.loss = tf.reduce_mean(self.losses)
             
             # Adjust Network
-            # self.learn = tf.train.AdamOptimizer(learning_rate).minimize(self.loss)
             self.learning_rate_op = tf.maximum(learning_rate, tf.train.exponential_decay(
                                                 learning_rate_start,
                                                 self.learning_rate_step,
                                                 learning_rate_decay_step,
                                                 learning_rate_decay,
                                                 staircase=True))
-            self.learn = tf.train.RMSPropOptimizer(self.learning_rate_op, momentum=0.95, epsilon=0.01).minimize(self.loss)
+            self.learn = tf.train.AdamOptimizer(self.learning_rate_op).minimize(self.loss)
 
             # For Tensorboard
             with tf.name_scope("summaries"):
