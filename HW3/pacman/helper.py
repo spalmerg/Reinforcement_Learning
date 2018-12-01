@@ -12,9 +12,10 @@ def preprocess(obs):
 
 class Network():
     def __init__(self, 
-                 learning_rate=0.000025,
+                 learning_rate=0.00025,
+                 learning_rate_start=.001,
                  learning_rate_decay = 0.96, 
-                 learning_rate_decay_step = 50000000, 
+                 learning_rate_decay_step = 1000000, 
                  hidden_size=10, 
                  action_size = 4, 
                  history_size=4, 
@@ -57,17 +58,17 @@ class Network():
                 padding = "VALID",
                 kernel_initializer=conv_init,
                 activation=tf.nn.relu)
-            # self.conv3 = tf.layers.conv2d(
-            #     inputs = self.conv2, 
-            #     filters = 128,
-            #     kernel_size = [4,4],
-            #     strides = [2,2],
-            #     padding = "VALID",
-            #     kernel_initializer=conv_init,
-            #     activation=tf.nn.relu)
+            self.conv3 = tf.layers.conv2d(
+                inputs = self.conv2, 
+                filters = 128,
+                kernel_size = [4,4],
+                strides = [2,2],
+                padding = "VALID",
+                kernel_initializer=conv_init,
+                activation=tf.nn.relu)
 
             # Fully Connected Layers
-            self.flatten = tf.contrib.layers.flatten(self.conv2)
+            self.flatten = tf.contrib.layers.flatten(self.conv3)
             self.fc1 = tf.layers.dense(self.flatten, 
                                         hidden_size, 
                                         activation=tf.nn.relu,
@@ -87,14 +88,13 @@ class Network():
             
             # Adjust Network
             # self.learn = tf.train.AdamOptimizer(learning_rate).minimize(self.loss)
-            self.learn = tf.train.RMSPropOptimizer(learning_rate, momentum=0.95, epsilon=0.01).minimize(self.loss)
-            # self.learning_rate_op = tf.maximum(learning_rate, tf.train.exponential_decay(
-            #                                     learning_rate,
-            #                                     self.learning_rate_step,
-            #                                     learning_rate_decay_step,
-            #                                     learning_rate_decay,
-            #                                     staircase=True))
-            # self.learn = tf.train.RMSPropOptimizer(self.learning_rate_op, momentum=0.95, epsilon=0.01).minimize(self.loss)
+            self.learning_rate_op = tf.maximum(learning_rate, tf.train.exponential_decay(
+                                                learning_rate_start,
+                                                self.learning_rate_step,
+                                                learning_rate_decay_step,
+                                                learning_rate_decay,
+                                                staircase=True))
+            self.learn = tf.train.RMSPropOptimizer(self.learning_rate_op, momentum=0.95, epsilon=0.01).minimize(self.loss)
 
             # For Tensorboard
             with tf.name_scope("summaries"):

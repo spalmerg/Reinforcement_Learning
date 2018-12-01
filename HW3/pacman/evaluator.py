@@ -14,7 +14,7 @@ os.environ["CUDA_VISIBLE_DEVICES"]="0"
 # Arguments
 parser = argparse.ArgumentParser(description='DQN for Breakout Game')
 parser.add_argument('--hidden_size', default=512, help='Number of hidden neurons in FC layers')
-parser.add_argument('--learning_rate', default=0.000025, help='Learning rate for optimizer')
+parser.add_argument('--learning_rate', default=0.001, help='Learning rate for optimizer')
 parser.add_argument('--action_size', default=4, help='Number of actions in the game')
 parser.add_argument('--games', default=1000, help="Number of games to play")
 parser.add_argument('--history_size', default=4, help='Number of steps sampled from buffer')
@@ -41,7 +41,7 @@ def main(args):
     # load game
     with tf.Session() as sess:
         print("SESSION STARTED")
-        saver.restore(sess, "model/model860.ckpt")
+        saver.restore(sess, "model/model15500.ckpt")
         print("MODEL RESTORED")
         for game in range(args.games):
             # start game & initialize memory
