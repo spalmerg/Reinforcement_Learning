@@ -23,7 +23,6 @@ parser.add_argument('--history_size', default=4, help='Number of steps sampled f
 def main(args): 
     # set up and reset game environment 
     env = gym.make('Breakout-v0')
-    state_memory = deque(maxlen=args.memory_size)
     env.reset()
 
     # initialize networks
