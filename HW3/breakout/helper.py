@@ -74,7 +74,7 @@ class Network():
                                         action_size, 
                                         activation=None,
                                         kernel_initializer=init)
-            
+
             # Get Prediction for the chosen action (epsilon greedy)
             self.action_one_hot = tf.one_hot(self.actions_, action_size, 1.0, 0.0, name='action_one_hot')
             self.chosen_action_pred = tf.reduce_sum(tf.multiply(self.predictions, self.action_one_hot), axis=1)
@@ -84,13 +84,7 @@ class Network():
             self.loss = tf.reduce_mean(self.losses)
             
             # Adjust Network
-            self.learning_rate_op = tf.maximum(learning_rate, tf.train.exponential_decay(
-                                                learning_rate_start,
-                                                self.learning_rate_step,
-                                                learning_rate_decay_step,
-                                                learning_rate_decay,
-                                                staircase=True))
-            self.learn = tf.train.AdamOptimizer(self.learning_rate_op).minimize(self.loss)
+            self.learn = tf.train.MomentumOptimizer(learning_rate, momentum=0.95, use_nesterov=True).minimize(self.loss)
 
             # For Tensorboard
             with tf.name_scope("summaries"):
