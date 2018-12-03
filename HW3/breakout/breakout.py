@@ -46,11 +46,11 @@ def main(args):
     tf.reset_default_graph()
     QNetwork = Network(name='QNetwork', hidden_size=args.hidden_size,
                                         learning_rate=args.learning_rate, 
-                                        action_size=args.action_size,
+                                        action_size=env.action_space.n,
                                         history_size=args.history_size)
     target = Network(name='Target', hidden_size=args.hidden_size,
                                         learning_rate=args.learning_rate, 
-                                        action_size=args.action_size,
+                                        action_size=env.action_space.n,
                                         history_size=args.history_size)
 
     # model saver
@@ -58,7 +58,7 @@ def main(args):
 
     # initialize buffer & history
     buffer = deque(maxlen=args.buffer_size)
-    history = np.zeros((105, 80, args.history_size + 1), dtype=np.uint8)
+    history = np.zeros((80, 80, args.history_size + 1), dtype=np.uint8)
 
     # exploit/explore schedule
     epsilons = np.linspace(args.epsilon_start, args.epsilon_end, args.epsilon_explore)
@@ -82,7 +82,7 @@ def main(args):
 
         # Fill The Buffer
         for i in range(args.buffer_size//20):
-            action = epsilon_greedy(sess, QNetwork, history[:,:,:args.history_size], epsilons[count])
+            action, _ = epsilon_greedy(sess, QNetwork, history[:,:,:args.history_size], epsilons[count])
             new_state, reward, done, _ = env.step(action)
             
             # history updates
@@ -114,7 +114,7 @@ def main(args):
 
             while True: 
                 # Add M to buffer (following policy)
-                action = epsilon_greedy(sess, QNetwork, history[:,:,:args.history_size], epsilons[count])
+                action, max_Q = epsilon_greedy(sess, QNetwork, history[:,:,:args.history_size], epsilons[count])
                 new_state, reward, done, _ = env.step(action)
 
                 # deal with history and state
@@ -126,16 +126,13 @@ def main(args):
                 # Add step to buffer
                 buffer.append([old_state, action, new_state, reward, done])
 
+                # Add max Q to result
+                result.append(max_Q)
+
                 if count % args.update_every == 0: 
                     ### Sample & Update
                     sample = random.sample(buffer, args.batch_size)
                     state_b, action_b, new_state_b, reward_b, done_b = map(np.array, zip(*sample))
-
-                    # Find max Q-Value per batch for progress
-                    Q_preds = sess.run(QNetwork.chosen_action_pred, 
-                                        feed_dict={QNetwork.inputs_: state_b,
-                                        QNetwork.actions_: action_b})
-                    result.append(np.max(Q_preds))
 
                     # Q-Network
                     T_preds = []

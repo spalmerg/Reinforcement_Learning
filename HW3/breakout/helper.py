@@ -2,10 +2,14 @@ import numpy as np
 import tensorflow as tf 
 
 
-def preprocess(img):
-    img = img[::2, ::2]
-    img = np.mean(img, axis=2).astype(np.uint8)
-    return img
+def preprocess(image):
+    """ prepro 210x160x3 uint8 frame into 6400 (80x80) 2D float array """
+    image = image[35:195] # crop
+    image = image[::2,::2,0] # downsample by factor of 2
+    image[image == 144] = 0 # erase background (background type 1)
+    image[image == 109] = 0 # erase background (background type 2)
+    image[image != 0] = 1 # everything else just set to 1
+    return np.reshape(image.astype(np.float).ravel(), [80,80])
 
 class Network():
     def __init__(self, 
@@ -36,11 +40,11 @@ class Network():
             self.learning_rate_step = tf.placeholder('int64', None, name='learning_rate_step')
 
             # Normalizing the input
-            self.inputs_scaled_ = self.inputs_/255.0
+            # self.inputs_scaled_ = self.inputs_/255.0
             
             # Three Convolutional Layers
             self.conv1 = tf.layers.conv2d(
-                inputs = self.inputs_scaled_, 
+                inputs = self.inputs_, 
                 filters = 16,
                 kernel_size = [8,8],
                 strides = [4,4],
