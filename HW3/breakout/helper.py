@@ -14,9 +14,6 @@ def preprocess(image):
 class Network():
     def __init__(self, 
                  learning_rate=0.00025,
-                 learning_rate_start=.001,
-                 learning_rate_decay = 0.96, 
-                 learning_rate_decay_step = 1000000, 
                  hidden_size=10, 
                  action_size = 4, 
                  history_size=4, 
@@ -50,7 +47,7 @@ class Network():
                 activation=tf.nn.relu)
             self.conv2 = tf.layers.conv2d(
                 inputs = self.conv1, 
-                filters = 8,
+                filters = 32,
                 kernel_size = [4,4],
                 strides = [2,2],
                 padding = "VALID",
