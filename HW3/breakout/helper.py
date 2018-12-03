@@ -65,7 +65,7 @@ class Network():
             #     activation=tf.nn.relu)
 
             # Fully Connected Layers
-            self.flatten = tf.contrib.layers.flatten(self.conv3)
+            self.flatten = tf.contrib.layers.flatten(self.conv2)
             self.fc1 = tf.layers.dense(self.flatten, 
                                         hidden_size, 
                                         activation=tf.nn.relu,
