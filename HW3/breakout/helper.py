@@ -31,7 +31,7 @@ class Network():
             init = tf.contrib.layers.xavier_initializer()
 
             # Store Variables
-            self.inputs_ = tf.placeholder(tf.float32, [None, 105, 80, history_size], name='inputs')
+            self.inputs_ = tf.placeholder(tf.float32, [None, 80, 80, history_size], name='inputs')
             self.target_preds_ = tf.placeholder(tf.float32, [None,], name="expected_future_rewards")
             self.chosen_action_pred = tf.placeholder(tf.float32, [None,], name="chosen_action_pred")
             self.actions_ = tf.placeholder(tf.int32, shape=[None], name='actions')
