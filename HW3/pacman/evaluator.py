@@ -22,7 +22,7 @@ parser.add_argument('--history_size', default=4, help='Number of steps sampled f
 
 def main(args): 
     # set up and reset game environment 
-    env = gym.make('Breakout-v0')
+    env = gym.make('MsPacman-v0')
     env.reset()
 
     # initialize networks
@@ -38,7 +38,7 @@ def main(args):
     saver = tf.train.Saver()
 
     # initialize history
-    history = np.zeros((80, 80, args.history_size + 1), dtype=np.uint8)
+    history = np.zeros((88, 80, args.history_size + 1), dtype=np.uint8)
 
     # load game
     with tf.Session() as sess:
