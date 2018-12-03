@@ -38,9 +38,6 @@ class Network():
             self.avg_max_Q_ = tf.placeholder(tf.float32, name="avg_max_Q")
             self.reward_ = tf.placeholder(tf.float32, name="reward")
             self.learning_rate_step = tf.placeholder('int64', None, name='learning_rate_step')
-
-            # Normalizing the input
-            # self.inputs_scaled_ = self.inputs_/255.0
             
             # Three Convolutional Layers
             self.conv1 = tf.layers.conv2d(
@@ -59,14 +56,6 @@ class Network():
                 padding = "VALID",
                 kernel_initializer=conv_init,
                 activation=tf.nn.relu)
-            # self.conv3 = tf.layers.conv2d(
-            #     inputs = self.conv2, 
-            #     filters = 128,
-            #     kernel_size = [4,4],
-            #     strides = [2,2],
-            #     padding = "VALID",
-            #     kernel_initializer=conv_init,
-            #     activation=tf.nn.relu)
 
             # Fully Connected Layers
             self.flatten = tf.contrib.layers.flatten(self.conv2)
